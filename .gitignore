@@ -1,5 +1,4 @@
 nbproject
 .idea
 *.log
-tmp/*
 *.sqlite3
