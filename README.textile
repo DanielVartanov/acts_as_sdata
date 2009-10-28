@@ -1,3 +1,6 @@
 h2. acts_as_sdata
 
 Ruby implementation of SData (Sage Data) protocol. Rails plugin which enables SData syndication.
+
+Copyright Sage 2009
+Released under the MIT license
