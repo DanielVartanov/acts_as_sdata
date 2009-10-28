@@ -7,12 +7,11 @@ module SData
     end
 
     def map_sdata_collection(pluralized_name)
-      connect "/#{pluralized_name}", :controller => pluralized_name, :action => 'index'
-      connect "/#{pluralized_name}\\(:predicate\\)", :controller => pluralized_name, :action => 'index'
+      connect "/#{pluralized_name}(\\(:predicate\\))", :controller => pluralized_name, :action => 'sdata_collection'
     end
 
     def map_sdata_instance(pluralized_name)
-      connect "#{pluralized_name}/!:id", :controller => pluralized_name, :action => 'show'
+      connect "#{pluralized_name}/!:id", :controller => pluralized_name, :action => 'sdata_instance'
     end
   end
 end
