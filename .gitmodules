@@ -1,0 +1,3 @@
+[submodule "example-app/vendor/plugins/usher"]
+	path = example-app/vendor/plugins/usher
+	url = git://github.com/joshbuddy/usher.git
