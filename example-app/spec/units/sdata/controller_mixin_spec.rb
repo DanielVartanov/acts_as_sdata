@@ -52,8 +52,8 @@ describe ControllerMixin do
               @controller.stub! :params => { :predicate => 'born_at gt 1900' }
             end
 
-            it "should return entity apply to SData::Predicate for conditions" do
-              Model.should_receive(:all).with :conditions => ['? > ?', 'born_at', '1900']
+            it "should apply to SData::Predicate for conditions" do
+              Model.should_receive(:all).with :conditions => ['"born_at" > ?', '1900']
               @controller.send :sdata_scope
             end
           end
