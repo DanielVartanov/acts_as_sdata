@@ -11,7 +11,7 @@ module SData
     end
 
     def map_sdata_instance(pluralized_name)
-      connect "#{pluralized_name}/!:id", :controller => pluralized_name, :action => 'sdata_instance'
+      connect "#{pluralized_name}/!:instance_id", :controller => pluralized_name, :action => 'sdata_instance'
     end
   end
 end

@@ -13,7 +13,7 @@ class PresidentsController < ApplicationController
   end
 
   def sdata_instance
-    president = President.find(params[:id])
+    president = President.find_by_sdata_instance_id(params[:instance_id])
 
     render :xml => president.to_atom, :content_type => "application/atom+xml; type=entry"
   end

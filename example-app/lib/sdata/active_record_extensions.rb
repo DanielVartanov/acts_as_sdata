@@ -6,7 +6,7 @@ module SData
                         :summary => entry_summary                                                
       end
 
-      protected
+    protected
 
       def entry_title
         title_proc = self.class.sdata_options[:title]
@@ -24,6 +24,15 @@ module SData
       self.sdata_options = options
 
       self.__send__ :include, InstanceMethods
+    end
+    
+    def find_by_sdata_instance_id(value)
+      attribute = self.sdata_options[:instance_id]
+      unless attribute.nil?
+        self.first :conditions => { attribute => value }
+      else
+        self.find(value.to_i)
+      end
     end
   end
 end
