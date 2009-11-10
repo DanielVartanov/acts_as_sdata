@@ -11,27 +11,39 @@ module SData
       end
     end
 
-  protected
+    module Actions
+      def sdata_instance
+        instance = self.class.sdata_options[:model].find_by_sdata_instance_id(params[:instance_id])
+        render :xml => instance.to_atom, :content_type => "application/atom+xml; type=entry"
+      end
+    end
+
+    module AuxilliaryMethods
+      protected
+
+      def build_sdata_feed
+        Atom::Feed.new do |f|
+          f.title = sdata_options[:feed][:title]
+          f.links << Atom::Link.new(:href => 'http://example.com' + sdata_options[:feed][:path])
+          f.updated = Time.now
+          f.authors << Atom::Person.new(:name => sdata_options[:feed][:author])
+          f.id = sdata_options[:feed][:id]
+        end
+      end
+
+      def sdata_scope
+        options = {}
+
+        if params.key? :predicate
+          predicate = SData::Predicate.parse(CGI::unescape(params[:predicate]))
+          options[:conditions] = predicate.to_conditions
+        end
+
+        sdata_options[:model].all(options)
+      end
+    end
     
-    def build_sdata_feed
-      Atom::Feed.new do |f|
-        f.title = sdata_options[:feed][:title]
-        f.links << Atom::Link.new(:href => 'http://example.com' + sdata_options[:feed][:path])
-        f.updated = Time.now
-        f.authors << Atom::Person.new(:name => sdata_options[:feed][:author])
-        f.id = sdata_options[:feed][:id]
-      end
-    end
-
-    def sdata_scope
-      options = {}
-
-      if params.key? :predicate
-        predicate = SData::Predicate.parse(CGI::unescape(params[:predicate]))
-        options[:conditions] = predicate.to_conditions
-      end
-
-      sdata_options[:model].all(options)
-    end
+    include AuxilliaryMethods
+    include Actions
   end
 end

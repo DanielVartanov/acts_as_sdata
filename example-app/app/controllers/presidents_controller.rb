@@ -10,11 +10,5 @@ class PresidentsController < ApplicationController
     presidents.entries += sdata_scope.map(&:to_atom)
 
     render :xml => presidents, :content_type => "application/atom+xml; type=feed"
-  end
-
-  def sdata_instance
-    president = President.find_by_sdata_instance_id(params[:instance_id])
-
-    render :xml => president.to_atom, :content_type => "application/atom+xml; type=entry"
-  end
+  end  
 end
