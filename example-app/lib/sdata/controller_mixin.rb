@@ -16,6 +16,13 @@ module SData
         instance = self.class.sdata_options[:model].find_by_sdata_instance_id(params[:instance_id])
         render :xml => instance.to_atom, :content_type => "application/atom+xml; type=entry"
       end
+
+      def sdata_collection
+        collection = build_sdata_feed
+        collection.entries += sdata_scope.map(&:to_atom)
+
+        render :xml => collection, :content_type => "application/atom+xml; type=feed"
+      end
     end
 
     module AuxilliaryMethods

@@ -4,11 +4,4 @@ class PresidentsController < ApplicationController
                            :author => 'Sage',
                            :path => '/presidents',
                            :title => 'List of US presidents' }
-
-  def sdata_collection
-    presidents = build_sdata_feed
-    presidents.entries += sdata_scope.map(&:to_atom)
-
-    render :xml => presidents, :content_type => "application/atom+xml; type=feed"
-  end  
 end

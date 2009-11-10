@@ -50,7 +50,7 @@ describe ControllerMixin, "#sdata_instance" do
 
     describe "whem params does not contain :instance_id key" do
       before :each do
-        @controller.stub! :params => { }
+        @controller.stub! :params => Hash.new
       end
 
       it "should..." do
