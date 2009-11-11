@@ -54,3 +54,9 @@ module SData
     include Actions
   end
 end
+
+module ActionController
+  class Base
+    include SData::ControllerMixin
+  end
+end

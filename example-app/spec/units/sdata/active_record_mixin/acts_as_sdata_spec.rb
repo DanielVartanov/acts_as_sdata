@@ -2,11 +2,11 @@ require File.join(File.dirname(__FILE__), '..', '..', '..', 'spec_helper')
 
 include SData
 
-describe ActiveRecordExtentions do
+describe ActiveRecordMixin do
   describe "given a class extended by ActiveRecordExtentions" do
     before :all do
       Base = Class.new
-      Base.extend(ActiveRecordExtentions)
+      Base.__send__ :include, ActiveRecordMixin
     end
 
     describe ".acts_as_sdata" do
@@ -30,6 +30,12 @@ describe ActiveRecordExtentions do
 
       it "should define #to_atom instance method" do
         Base.new.should respond_to(:to_atom)
+      end
+
+      describe "when :instance_id is passed" do
+        it "should check if passed attribute is unique" do
+          pending "Not implemented yet"
+        end
       end
     end
   end
