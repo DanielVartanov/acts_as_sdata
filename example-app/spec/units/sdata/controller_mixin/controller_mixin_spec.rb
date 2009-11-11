@@ -10,17 +10,12 @@ describe ControllerMixin do
 
     describe "when SData::ControllerMixin is included" do
       before :each do
-        Base.__send__ :include, ControllerMixin
+        Base.extend ControllerMixin
       end
 
       it "class should respond to .acts_as_sdata" do
         Base.should respond_to(:acts_as_sdata)
         Base.new.should_not respond_to(:acts_as_sdata)
-      end
-
-      it "instance should respond to methods of ControllerMixin::InstanceMethods" do
-        Base.new.should respond_to(:build_sdata_feed)
-        Base.should_not respond_to(:build_sdata_feed)
       end
     end
   end

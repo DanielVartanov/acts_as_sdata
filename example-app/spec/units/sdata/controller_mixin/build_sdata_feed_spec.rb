@@ -6,7 +6,7 @@ describe ControllerMixin, "#build_sdata_feed" do
   describe "given a controller which acts as sdata" do
     before :all do
       Base = Class.new(ActionController::Base)
-      Base.__send__ :include, ControllerMixin
+      Base.extend ControllerMixin
       Base.__send__ :define_method, :build_sdata_feed, lambda { super }
 
       Base.acts_as_sdata  :feed => { :id => 'some-unique-id',

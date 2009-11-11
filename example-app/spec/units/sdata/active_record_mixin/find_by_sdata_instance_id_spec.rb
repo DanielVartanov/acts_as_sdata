@@ -6,7 +6,7 @@ describe ActiveRecordMixin, "#find_by_sdata_instance_id" do
   describe "given a class extended by ActiveRecordExtentions" do
     before :all do
       Model = Class.new(ActiveRecord::Base)
-      Model.__send__ :include, ActiveRecordMixin
+      Model.extend ActiveRecordMixin
     end
 
     describe "when @@sdata_options contain :instance_id" do

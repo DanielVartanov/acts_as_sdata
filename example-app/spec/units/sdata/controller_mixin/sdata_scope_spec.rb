@@ -6,7 +6,7 @@ describe ControllerMixin, "#sdata_scope" do
   describe "given a controller which acts as sdata" do
     before :all do
       Base = Class.new(ActionController::Base)
-      Base.__send__ :include, ControllerMixin
+      Base.extend ControllerMixin
       Base.__send__ :define_method, :sdata_scope, lambda { super }
       
       Model = Class.new

@@ -6,7 +6,7 @@ describe ControllerMixin, "#sdata_instance" do
   describe "given a controller which acts as sdata" do
     before :all do
       Base = Class.new(ActionController::Base)
-      Base.__send__ :include, ControllerMixin
+      Base.extend ControllerMixin
 
       Model = Class.new
       Base.acts_as_sdata  :model => Model

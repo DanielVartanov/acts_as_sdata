@@ -6,7 +6,7 @@ describe ControllerMixin, "#sdata_collection" do
   describe "given a model which acts as sdata" do
     before :all do
       Model = Class.new      
-      Model.__send__ :include, ActiveRecordMixin
+      Model.extend ActiveRecordMixin
       Model.acts_as_sdata
       Model.stub! :all => [Model.new, Model.new]
     end
@@ -14,7 +14,7 @@ describe ControllerMixin, "#sdata_collection" do
     describe "given a controller which acts as sdata" do
       before :all do
         Base = Class.new(ActionController::Base)
-        Base.__send__ :include, ControllerMixin
+        Base.extend ControllerMixin
 
 
         Base.acts_as_sdata  :model => Model,

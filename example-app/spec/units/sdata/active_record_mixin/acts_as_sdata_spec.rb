@@ -6,7 +6,7 @@ describe ActiveRecordMixin do
   describe "given a class extended by ActiveRecordExtentions" do
     before :all do
       Base = Class.new
-      Base.__send__ :include, ActiveRecordMixin
+      Base.extend ActiveRecordMixin
     end
 
     describe ".acts_as_sdata" do
@@ -28,7 +28,7 @@ describe ActiveRecordMixin do
         Base.new.sdata_options.should == @options        
       end
 
-      it "should define #to_atom instance method" do
+      it "should include instance methods" do
         Base.new.should respond_to(:to_atom)
       end
 

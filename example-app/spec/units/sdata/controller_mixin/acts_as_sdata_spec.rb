@@ -6,7 +6,7 @@ describe ControllerMixin, ".acts_as_sdata" do
   describe "given an ActionController::Base class extended by ControllerMixin" do
     before :all do
       Base = Class.new ActionController::Base
-      Base.__send__ :include, ControllerMixin
+      Base.extend ControllerMixin
     end
 
     before :each do
@@ -20,6 +20,10 @@ describe ControllerMixin, ".acts_as_sdata" do
 
     it "should make passed options available for instances" do
       Base.new.sdata_options.should == @options
+    end
+
+    it "should include instance methods" do
+      Base.new.should respond_to(:build_sdata_feed)
     end
   end
 end
