@@ -89,7 +89,7 @@ h3. In router
 <code>map.sdata_resource :presidents</code>
 _this line will enable all SData-related paths for /presidents_
 
-Also you should to include special routing delimiters which are used in SData paths (remember, we are using Usher, this will _NOT_ work with native Rails Router).
+Also you should include special routing delimiters which are used in SData paths (remember, we are using Usher, this will _NOT_ work with native Rails Router).
 
 Change
 <code>ActionController::Routing::Routes.draw do |map|</code>
@@ -103,7 +103,7 @@ h3. In controller
                           :author => 'Sage',
                           :path => '/presidents',
                           :title => 'List of US presidents' }</pre>
-_<code>:feed</code> options are fields of Atom feed_
+_<code>:feed</code> options defines fields of Atom feed_
 
 h3. In model
 
