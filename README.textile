@@ -1,6 +1,120 @@
-h2. acts_as_sdata
+h1. acts_as_sdata
 
 Ruby implementation of SData (Sage Data) protocol. Rails plugin which enables SData syndication.
+
+h2. Demo
+
+Let's consider we want to expose the list of US presidents in SData way (this is exactly what is done in "example-app":http://github.com/DanielVartanov/acts_as_sdata/tree/master/example-app/).
+
+From client side it will look like this:
+
+h3. Instance path
+
+<code>http://localhost:3000/presidents/!Wilson</code>
+
+<pre><?xml version="1.0" encoding="UTF-8"?>
+<entry xmlns="http://www.w3.org/2005/Atom">
+  <title>Wilson, Woodrow</title>
+  <summary>Wilson, Woodrow (1856-1924)</summary>
+</entry></pre>
+
+h3. Collection path
+
+<code>http://localhost:3000/presidents</code>
+
+<pre><?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <id>urn:uuid:60a76c80-d399-11d9-b93C-0003939e0af6</id>
+  <title>List of US presidents</title>
+  <updated>2009-11-17T10:55:28+06:00</updated>
+  <link href="http://example.com/presidents"/>
+  <author>
+    <name>Sage</name>
+  </author>
+  <entry>
+    <title>Washington, George</title>
+    <summary>Washington, George (1732-1799)</summary>
+  </entry>
+  <entry>
+    <title>Adams, John</title>
+    <summary>Adams, John (1735-1826)</summary>
+  </entry>
+.....
+</pre>
+
+h3. Predicate
+
+<code>http://localhost:3000/presidents(born_at gt 1900)</code>
+
+<pre><?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <id>urn:uuid:60a76c80-d399-11d9-b93C-0003939e0af6</id>
+  <title>List of US presidents</title>
+  <updated>2009-11-17T10:58:15+06:00</updated>
+  <link href="http://example.com/presidents"/>
+  <author>
+    <name>Sage</name>
+  </author>
+  <entry>
+    <title>Kennedy, John</title>
+    <summary>Kennedy, John (1917-1963)</summary>
+  </entry>
+  <entry>
+    <title>Johnson, Lyndon</title>
+    <summary>Johnson, Lyndon (1908-1973)</summary>
+  </entry>
+.....
+</pre>
+
+h2. How to install
+
+h3. Install Usher
+
+_(Usher is an alternative router)_
+
+It is better to refer to "User's page":http://github.com/joshbuddy/usher/, but usually installation of Usher plugin is just one commad:
+
+<code>script/plugin install git://github.com/joshbuddy/usher.git</code>
+
+h3. Install acts_as_sdata
+
+_Coming soon..._
+
+h2. How to use
+
+In order to make application act as SData you should write the following.
+
+h3. In router
+
+<code>map.sdata_resource :presidents</code>
+_this line will enable all SData-related paths for /presidents_
+
+Also you should to include special routing delimiters which are used in SData paths (remember, we are using Usher, this will _NOT_ work with native Rails Router).
+
+Change
+<code>ActionController::Routing::Routes.draw do |map|</code>
+to
+<code>ActionController::Routing::Routes.draw(:delimiters => ['/', '.', '!', '\(', '\)' ]) do |map|</code>
+
+h3. In controller
+
+<pre>acts_as_sdata :model => President,
+              :feed => { :id => 'urn:uuid:60a76c80-d399-11d9-b93C-0003939e0af6',
+                          :author => 'Sage',
+                          :path => '/presidents',
+                          :title => 'List of US presidents' }</pre>
+_<code>:feed</code> options are fields of Atom feed_
+
+h3. In model
+
+<pre>acts_as_sdata :title => lambda { "#{last_name}, #{first_name}" },
+              :summary => lambda { "#{last_name}, #{first_name} (#{born_at}-#{died_at})" },
+              :instance_id => :last_name</pre>
+
+_Note #1: these lambda's will be executed in context of the actual model instance._
+
+_Note #2: SData specifications say that human-readable instance id's are preferred. The <code>:instance_id</code> option helps to enable search by any unique attribute._
+
 
 Copyright Sage 2009
 Released under the MIT license
