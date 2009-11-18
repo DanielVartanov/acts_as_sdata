@@ -26,12 +26,20 @@ module SData
 
       def entry_title
         title_proc = self.class.sdata_options[:title]
-        title_proc ? instance_eval(&title_proc) : "#{self.class.name}(#{id})"
+        title_proc ? instance_eval(&title_proc) : default_entity_title
+      end
+
+      def default_entity_title
+        "#{self.class.name}(#{id})"
       end
 
       def entry_summary
         summary_proc = self.class.sdata_options[:summary]
-        summary_proc ? instance_eval(&summary_proc) : self.class.name
+        summary_proc ? instance_eval(&summary_proc) : default_entry_summary
+      end
+      
+      def default_entry_summary
+        self.class.name
       end
     end
   end
