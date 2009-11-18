@@ -78,7 +78,13 @@ It is better to refer to "User's page":http://github.com/joshbuddy/usher/, but u
 
 h3. Install acts_as_sdata
 
-_Coming soon..._
+<code>$ git clone git://github.com/DanielVartanov/acts_as_sdata.git</code>
+<code>$ cd acts_as_sdata</code>
+<code>$ git submodule init</code>
+<code>$ git submodule update</code>
+
+next,
+_coming soon..._
 
 h2. How to use
 
