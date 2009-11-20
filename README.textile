@@ -4,7 +4,7 @@ Ruby implementation of SData (Sage Data) protocol. Rails plugin which enables SD
 
 h2. Demo
 
-Let's consider we want to expose the list of US presidents in SData way (this is exactly what is done in "example-app":http://github.com/DanielVartanov/acts_as_sdata/tree/master/example-app/).
+Let's consider we want to expose the list of US presidents in SData way (this is exactly what is done in "presidents":http://github.com/DanielVartanov/acts_as_sdata-examples/tree/master/presidents/ application in "examples":http://github.com/DanielVartanov/acts_as_sdata-examples repository).
 
 From client side it will look like this:
 
@@ -78,14 +78,7 @@ It is better to refer to "User's page":http://github.com/joshbuddy/usher/, but u
 
 h3. Install acts_as_sdata
 
-_coming soon..._
-
-h3. (optional) Install example-app
-
-<code>$ git clone git://github.com/DanielVartanov/acts_as_sdata.git</code>
-<code>$ cd acts_as_sdata</code>
-<code>$ git submodule init</code>
-<code>$ git submodule update</code>
+<code>$ ./script/plugin install git://github.com/DanielVartanov/acts_as_sdata.git</code>
 
 h2. How to use
 
