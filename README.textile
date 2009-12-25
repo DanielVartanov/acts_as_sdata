@@ -115,6 +115,27 @@ _Note #1: these lambda's will be executed in context of the actual model instanc
 
 _Note #2: SData specifications say that human-readable instance id's are preferred. The <code>:instance_id</code> option helps to enable search by any unique attribute._
 
+h2. Removing ambiguity
+
+h3. Problem
+
+There is an ambigious path in case of exposing same resource in both REST and SData ways:
+
+<code>/presidents</code>
+
+It might be treated either as #index (REST way) or as #sdata_collection (SData way).
+
+h3. Solution
+
+In order to remove this ambiguity, a :formatted_collection_path option can be given as a second parameter to #sdata_resource in routes.rb:
+
+<code>map.sdata_resource :presidents, :formatted_collection_path => true</code>
+
+Then,
+<code>/presidents</code> routes to Presidents#index and returns HTML
+<code>/presidents.sdata</code> routes to Presidents#sdata_collection and returns Atom/XML
+
+<i>without any changes in the controller code!</i>
 
 Copyright Sage 2009
 Released under the MIT license
