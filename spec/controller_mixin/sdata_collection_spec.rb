@@ -5,9 +5,13 @@ include SData
 describe ControllerMixin, "#sdata_collection" do
   describe "given a model which acts as sdata" do
     before :all do
-      Model = Class.new      
-      Model.extend ActiveRecordMixin
-      Model.acts_as_sdata
+      class Model
+        extend ActiveRecordMixin
+        acts_as_sdata
+
+        def attributes; {} end
+      end
+
       Model.stub! :all => [Model.new, Model.new]
     end
 

@@ -9,17 +9,19 @@ module SData
 
     def find_by_sdata_instance_id(value)
       attribute = self.sdata_options[:instance_id]
-      unless attribute.nil?
-        self.first :conditions => { attribute => value }
-      else
-        self.find(value.to_i)
-      end
+
+      attribute.nil? ?
+        self.find(value.to_i) :
+        self.first(:conditions => { attribute => value })
     end
 
     module InstanceMethods
       def to_atom
-        Atom::Entry.new :title => entry_title,
-                        :summary => entry_summary                                                
+        entry = Atom::Entry.new :title => entry_title,
+                                :summary => entry_summary
+
+        add_attributes(entry)
+        entry
       end
 
     protected
@@ -40,6 +42,12 @@ module SData
       
       def default_entry_summary
         self.class.name
+      end
+
+      def add_attributes(entry)
+        self.attributes.each_pair do |name, value|
+          entry['http://sdata.sage.com/schemes/attributes', name] << value
+        end
       end
     end
   end

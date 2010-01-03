@@ -13,7 +13,7 @@ describe ActiveRecordMixin, "#to_atom" do
       before :each do
         Base.class_eval { acts_as_sdata }
         @model = Base.new
-        @model.stub! :id => 1
+        @model.stub! :id => 1, :attributes => {}
       end
 
       it "should return an Atom::Entry instance" do
@@ -39,6 +39,12 @@ describe ActiveRecordMixin, "#to_atom" do
       it "should assign Atom::Entry::id" do
         pending
       end
+
+      it "should expose activerecord attributes in a simple XML extension" do
+        @model.stub! :attributes => { :last_name => "Washington", :first_name => "George" }
+        atom_entry = @model.to_atom
+        atom_entry['http://sdata.sage.com/schemes/attributes'].should == { 'last_name' => ["Washington"], 'first_name' => ["George"] }
+      end
     end
 
     describe "when .acts_as_sdata is called with arguments" do
@@ -46,6 +52,8 @@ describe ActiveRecordMixin, "#to_atom" do
         Base.class_eval do
           acts_as_sdata :title => lambda { "#{id}: #{name}" },
                         :summary => lambda { "#{name}" }
+
+          def attributes; {} end
         end
 
         @model = Base.new
