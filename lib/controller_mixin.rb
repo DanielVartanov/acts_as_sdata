@@ -6,12 +6,21 @@ module SData
 
       self.__send__ :include, InstanceMethods
     end
-    
+
     module InstanceMethods
       module Actions
-        def sdata_instance
-          instance = self.class.sdata_options[:model].find_by_sdata_instance_id(params[:instance_id])
+        def sdata_show_instance
+          instance = model_class.find_by_sdata_instance_id(params[:instance_id])
           render :xml => instance.to_atom, :content_type => "application/atom+xml; type=entry"
+        end
+
+        def sdata_create_instance
+          new_instance = model_class.new(params[:entry].to_attributes)
+          if new_instance.save
+            render :xml => new_instance.to_atom.to_xml, :status => :created, :content_type => "application/atom+xml; type=entry"
+          else
+            render :xml => new_instance.errors.to_xml, :status => :bad_request
+          end
         end
 
         def sdata_collection
@@ -24,6 +33,10 @@ module SData
 
       module AuxilliaryMethods
         protected
+
+        def model_class
+          self.class.sdata_options[:model]
+        end
 
         def build_sdata_feed
           Atom::Feed.new do |f|

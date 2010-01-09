@@ -127,9 +127,9 @@ It might be treated either as #index (REST way) or as #sdata_collection (SData w
 
 h3. Solution
 
-In order to remove this ambiguity, a :formatted_collection_path option can be given as a second parameter to #sdata_resource in routes.rb:
+In order to remove this ambiguity, a :formatted_paths option can be given as a second parameter to #sdata_resource in routes.rb:
 
-<code>map.sdata_resource :presidents, :formatted_collection_path => true</code>
+<code>map.sdata_resource :presidents, :formatted_paths => true</code>
 
 Then,
 <code>/presidents</code> routes to Presidents#index and returns HTML

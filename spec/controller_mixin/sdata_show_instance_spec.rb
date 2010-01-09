@@ -2,7 +2,7 @@ require File.join(File.dirname(__FILE__), '..', 'spec_helper')
 
 include SData
 
-describe ControllerMixin, "#sdata_instance" do
+describe ControllerMixin, "#sdata_show_instance" do
   describe "given a controller which acts as sdata" do
     before :all do
       Base = Class.new(ActionController::Base)
@@ -33,7 +33,7 @@ describe ControllerMixin, "#sdata_instance" do
           @record.should_receive(:to_atom).and_return(entry)
           @controller.should_receive(:render).with(:xml => entry, :content_type => "application/atom+xml; type=entry")
 
-          @controller.sdata_instance
+          @controller.sdata_show_instance
         end
       end
 
