@@ -123,7 +123,7 @@ h3. Install Usher
 
 _(Usher is an alternative router)_
 
-It is better to refer to "User's page":http://github.com/joshbuddy/usher/, but usually installation of Usher plugin is just one commad:
+It is better to refer to "Usher's page":http://github.com/joshbuddy/usher/, but usually installation of Usher plugin is just one commad:
 
 <code>$ script/plugin install git://github.com/joshbuddy/usher.git</code>
 
