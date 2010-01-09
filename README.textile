@@ -1,6 +1,6 @@
 h1. acts_as_sdata
 
-Ruby implementation of SData (Sage Data) protocol. Rails plugin which enables SData syndication.
+Ruby implementation of SData (Sage Data) protocol. Rails plugin which enables SData syndication and publishing.
 
 h2. Demo
 
@@ -13,9 +13,21 @@ h3. Instance path
 <code>http://localhost:3000/presidents/!Wilson</code>
 
 <pre><?xml version="1.0" encoding="UTF-8"?>
-<entry xmlns="http://www.w3.org/2005/Atom">
+<entry xmlns="http://www.w3.org/2005/Atom" xmlns:attributes="http://sdata.sage.com/schemes/attributes">
   <title>Wilson, Woodrow</title>
   <summary>Wilson, Woodrow (1856-1924)</summary>
+  <attributes:born_at>1856</attributes:born_at>
+  <attributes:id>28</attributes:id>
+  <attributes:first_name>Woodrow</attributes:first_name>
+  <attributes:last_name>Wilson</attributes:last_name>
+  <attributes:party>Democrat</attributes:party>
+  <attributes:updated_at>Sat Jan 09 11:43:11 UTC 2010</attributes:updated_at>
+  <attributes:died_at>1924</attributes:died_at>
+  <attributes:order>28</attributes:order>
+  <attributes:term_started_at>1913</attributes:term_started_at>
+  <attributes:created_at>Sat Jan 09 11:43:11 UTC 2010</attributes:created_at>
+  <attributes:country>USA</attributes:country>
+  <attributes:term_ended_at>1921</attributes:term_ended_at>
 </entry></pre>
 
 h3. Collection path
@@ -65,6 +77,45 @@ h3. Predicate
   </entry>
 .....
 </pre>
+
+h3. Publishing
+
+SData protocol supports data publishing (as Atom Publishing Protocol does)
+
+Example:
+
+<pre>require 'atom/pub'
+
+collection = Atom::Pub::Collection.new(:href => 'http://localhost:3000/presidents')
+
+entry = Atom::Entry.load_entry <<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<entry xmlns="http://www.w3.org/2005/Atom" xmlns:attributes="http://sdata.sage.com/schemes/attributes">
+  <attributes:born_at>1961</attributes:born_at>
+  <attributes:first_name>Barack</attributes:first_name>
+  <attributes:last_name>Obama</attributes:last_name>
+  <attributes:party>Democrat</attributes:party>
+  <attributes:died_at/>
+  <attributes:order>44</attributes:order>
+  <attributes:term_started_at>2009</attributes:term_started_at>
+  <attributes:country>USA</attributes:country>
+  <attributes:term_ended_at/>
+</entry>
+XML
+
+collection.publish entry</pre>
+
+The response will be:
+
+<pre>
+<?xml version="1.0" encoding="UTF-8"?>
+<entry xmlns="http://www.w3.org/2005/Atom" xmlns:attributes="http://sdata.sage.com/schemes/attributes">
+  <attributes:id>46</attributes:id>
+  <attributes:created_at>Sat Jan 09 14:29:57 UTC 2010</attributes:created_at>
+  <attributes:first_name>Barack</attributes:first_name>
+  ...
+</entry></pre>
+_with status 201 (Created)_
 
 h2. How to install
 
