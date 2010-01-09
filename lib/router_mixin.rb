@@ -13,11 +13,11 @@ module SData
     end
 
     def map_formatted_sdata_collection(pluralized_name)
-      connect "/#{pluralized_name}.sdata", :controller => pluralized_name, :action => 'sdata_collection'
+      connect "/#{pluralized_name}.sdata", :controller => pluralized_name, :action => 'sdata_collection', :conditions => { :method => :get }
     end
 
     def map_sdata_collection(pluralized_name)
-      connect "/#{pluralized_name}", :controller => pluralized_name, :action => 'sdata_collection'
+      connect "/#{pluralized_name}", :controller => pluralized_name, :action => 'sdata_collection', :conditions => { :method => :get }
     end
 
     def map_sdata_collection_with_predicate(pluralized_name)
