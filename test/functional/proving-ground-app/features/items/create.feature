@@ -1,7 +1,7 @@
 Feature: create item
 
 Scenario: Agent creates an item
-  When I post to /items.xml with:
+  When I post to /items with:
     """
 <?xml version="1.0" encoding="UTF-8"?>
 <item>
