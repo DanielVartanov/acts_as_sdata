@@ -23,6 +23,6 @@ Then /response status should be (\d+)/ do |code|
   response.code.to_i.should == code.to_i
 end
 
-Then /^show me the output$/ do
+Then /^show me response body/ do
   puts response_body
 end
