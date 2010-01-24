@@ -1,4 +1,4 @@
-ActionController::Routing::Routes.draw do |map|
+ActionController::Routing::Routes.draw(:delimiters => ['/', '.', '!', '\(', '\)' ]) do |map|
   map.resources :items
 
   # The priority is based upon order of creation: first created -> highest priority.
