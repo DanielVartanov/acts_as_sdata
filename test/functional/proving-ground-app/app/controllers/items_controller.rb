@@ -1,10 +1,12 @@
 class ItemsController < ApplicationController
+  acts_as_sdata :model => Item,
+              :feed => { :id => 'urn:uuid:60a76c80-d399-11d9-b93C-0003939e0af6',
+                          :author => 'acts as SData',
+                          :path => '/items',
+                          :title => 'Items' }
+
   def index
     render :xml => Item.all.to_xml
-  end
-
-  def sdata_collection
-    index
   end
 
   def create    
