@@ -27,11 +27,11 @@ Then /response content type should be "(.+)"/ do |content_type|
   response.headers["Content-Type"].should == content_type
 end
 
-Then /^show me response body/ do
+Then /^show me response body$/ do
   puts response_body
 end
 
-Then /^show me response/ do
+Then /^show me response$/ do
   require 'pp'
   pp response.inspect
 end
