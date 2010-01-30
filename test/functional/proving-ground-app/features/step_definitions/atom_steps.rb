@@ -6,6 +6,11 @@ def atom_feed
   Atom::Feed.load_feed(response.body)
 end
 
+When /I post the following Atom entry to (.+) with:$/ do |path, entry|
+  header 'Content-Type', Webrat::MIME.mime_type('.atom')
+  request_page path, :post, entry
+end
+
 Then /response should contain Atom entry/ do
   Then %{response content type should be "application/atom+xml; type=entry"}
   lambda { atom_entry }.should_not raise_error
