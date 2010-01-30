@@ -6,7 +6,7 @@ def atom_feed
   Atom::Feed.load_feed(response.body)
 end
 
-When /I post the following Atom entry to (.+) with:$/ do |path, entry|
+When /I post the following Atom entry to (.+):$/ do |path, entry|
   header 'Content-Type', Webrat::MIME.mime_type('.atom')
   request_page path, :post, entry
 end

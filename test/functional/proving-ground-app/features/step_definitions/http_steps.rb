@@ -7,18 +7,6 @@ When /^I post to (.+) with:$/ do |page_address, data|
   request_page page_address, :post, data
 end
 
-Then /^response body should have XPath (.+)$/ do |xpath|
-  xml_document = Nokogiri::XML(response.body.to_s)
-  xml_node_set = xml_document.root.children
-  xml_node_set.should have_xpath(xpath)
-end
-
-Then /^response body should not have XPath (.*)$/ do |xpath|
-  xml_document = Nokogiri::XML(response.body.to_s)
-  xml_node_set = xml_document.root.children
-  xml_node_set.should_not have_xpath(xpath)
-end
-
 Then /response status should be (\d+)/ do |code|
   response.code.to_i.should == code.to_i
 end
@@ -33,5 +21,5 @@ end
 
 Then /^show me response$/ do
   require 'pp'
-  pp response.inspect
+  pp response
 end
