@@ -166,6 +166,14 @@ _Note #1: these lambda's will be executed in context of the actual model instanc
 
 _Note #2: SData specifications say that human-readable instance id's are preferred. The <code>:instance_id</code> option helps to enable search by any unique attribute._
 
+h3. Initializer
+
+In config/initializers/mime_types.rb add the following:
+
+<pre>ActionController::Base.param_parsers[Mime::Type.lookup('application/atom+xml')] = Proc.new do |data|
+  { :entry => Atom::Entry.load_entry(data) }
+end</pre>
+
 h2. Removing ambiguity
 
 h3. Problem
