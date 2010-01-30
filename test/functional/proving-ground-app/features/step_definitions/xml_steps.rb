@@ -1,5 +1,10 @@
+def parse_xml(xml_string)
+  parsing_options = Nokogiri::XML::ParseOptions::DEFAULT_XML | Nokogiri::XML::ParseOptions::NOBLANKS
+  Nokogiri::XML(xml_string, nil, nil, parsing_options)
+end
+
 def xml_document
-  Nokogiri::XML(response.body.to_s)
+  parse_xml(response.body.to_s)
 end
 
 Then /^XML document should have XPath (.+)$/ do |xpath|
@@ -17,5 +22,7 @@ end
 
 Then /^XML document should contain the following at XPath (.+):$/ do |xpath, xml|
   Then %{XML document should have XPath #{xpath}}
-  xml_document.xpath(xpath).to_xml.should == Nokogiri::XML(xml).root.to_xml
+
+  expected_xml_document = parse_xml(xml)
+  xml_document.xpath(xpath).to_xml.should == expected_xml_document.root.to_xml
 end

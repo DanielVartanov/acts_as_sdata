@@ -23,6 +23,8 @@ Feature: Create SData instance
     And response should contain XML document
     And XML document should contain the following at XPath /errors:
         """
-        <errors><error>Name can't be blank</error></errors>
+        <errors>
+            <error>Name can't be blank</error>
+        </errors>
 
         """
