@@ -9,6 +9,13 @@ module SData
 
     module InstanceMethods
       module Actions
+        def sdata_collection
+          collection = build_sdata_feed
+          collection.entries += sdata_scope.map(&:to_atom)
+
+          render :xml => collection, :content_type => "application/atom+xml; type=feed"
+        end
+
         def sdata_show_instance
           instance = model_class.find_by_sdata_instance_id(params[:instance_id])
           render :xml => instance.to_atom, :content_type => "application/atom+xml; type=entry"
@@ -23,11 +30,19 @@ module SData
           end
         end
 
-        def sdata_collection
-          collection = build_sdata_feed
-          collection.entries += sdata_scope.map(&:to_atom)
-
-          render :xml => collection, :content_type => "application/atom+xml; type=feed"
+        def sdata_update_instance
+          instance = model_class.find_by_sdata_instance_id(params[:instance_id])
+          response.etag = [instance]
+          if request.fresh?(response)
+            if instance.update_attributes(params[:entry].to_attributes)
+              response.etag = [instance]
+              render :xml => instance.to_atom.to_xml, :content_type => "application/atom+xml; type=entry"
+            else
+              render :xml => instance.errors.to_xml, :status => :bad_request
+            end
+          else
+            render :text => nil, :status => :precondition_failed
+          end
         end
       end
 

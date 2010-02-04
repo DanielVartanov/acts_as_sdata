@@ -8,6 +8,7 @@ module SData
       map_sdata_collection_with_predicate(pluralized_name)
       map_sdata_show_instance(pluralized_name)
       map_sdata_create_instance(pluralized_name, formatted_paths)
+      map_sdata_update_instance(pluralized_name)
     end
 
     def map_sdata_collection(pluralized_name, formatted_paths = false)
@@ -28,6 +29,11 @@ module SData
     def map_sdata_create_instance(pluralized_name, formatted_paths = false)
       path = formatted_paths ? "/#{pluralized_name}.sdata" : "/#{pluralized_name}"
       connect path, :controller => pluralized_name, :action => 'sdata_create_instance', :conditions => { :method => :post }
+    end
+
+    def map_sdata_update_instance(pluralized_name)
+      path = "#{pluralized_name}/!:instance_id"
+      connect path, :controller => pluralized_name, :action => 'sdata_update_instance', :conditions => { :method => :put }
     end
   end
 end

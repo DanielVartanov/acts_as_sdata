@@ -2,14 +2,18 @@ Given /global ETag stub value is "(.+)"/ do |etag|
   ActionController::Response.any_instance.stubs(:etag).returns(etag)
 end
 
-When /I get ([\w\/!\(\)]+) with the following headers:$/ do |path, headers|
+When /I set the following headers:/ do |headers|
   headers.hashes.each do |header_hash|
     header header_hash[:name], header_hash[:value]
   end
+end
+
+When /I get ([\w\/!\(\)\s]+) with the following headers:$/ do |path, headers|
+  When %{I set the following headers:}, headers
   request_page path, :get, {}
 end
 
-When /^I get ([\w\/!\(\)]+)$/ do |path|
+When /^I get ([\w\/!\(\)\s]+)$/ do |path|
   get path, nil
 end
 

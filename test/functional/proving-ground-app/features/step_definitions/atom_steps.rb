@@ -11,6 +11,11 @@ When /I post the following Atom entry to (.+):$/ do |path, entry|
   request_page path, :post, entry
 end
 
+When /I PUT the following Atom entry to (.+):$/ do |path, entry|
+  header 'Content-Type', Webrat::MIME.mime_type('.atom')
+  request_page path, :put, entry
+end
+
 Then /response should contain Atom entry/ do
   Then %{response content type should be "application/atom+xml; type=entry"}
   lambda { atom_entry }.should_not raise_error
