@@ -1,0 +1,3 @@
+[submodule "test/functional/proving-ground-app/vendor/plugins/usher"]
+	path = test/functional/proving-ground-app/vendor/plugins/usher
+	url = git://github.com/joshbuddy/usher.git
