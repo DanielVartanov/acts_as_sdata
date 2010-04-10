@@ -17,11 +17,11 @@ module SData
 
     module InstanceMethods
       def to_atom
-        entry = Atom::Entry.new :title => entry_title,
-                                :summary => entry_summary
-
-        add_attributes(entry)
-        entry
+        returning Atom::Entry.new do |entry|
+          entry.title = entry_title
+          entry.summary = entry_summary
+          add_attributes(entry)
+        end
       end
 
     protected
