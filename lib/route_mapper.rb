@@ -33,7 +33,15 @@ module SData
     def map_route(path, action, method)
       path = prefix + path if prefix?
       path = path + ".sdata" if formatted_paths?
-      router.connect path, :controller => controller, :action => action, :conditions => { :method => method }
+      router.connect path, :controller => controller_with_namespace, :action => action, :conditions => { :method => method }
+    end
+
+    def controller_with_namespace
+      @controller_with_namespace ||= "#{namespace}#{controller}"
+    end
+
+    def namespace
+      @namespace ||= ("#{options[:namespace]}/" || "")
     end
 
     def controller
