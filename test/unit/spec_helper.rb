@@ -1,7 +1,13 @@
+def setup_active_record
+  ActiveRecord::Base.establish_connection :adapter => "sqlite3",
+    :database  => ":memory:"
+end
+
+require 'atom'
+require 'active_record'
+require 'action_pack'
+
+setup_active_record
+
 __DIR__ =File.dirname(__FILE__)
-
-ENV['RAILS_ENV'] = 'test'
-ENV['RAILS_ROOT'] ||= File.join(__DIR__, '..', '..', '..', '..')
-require File.expand_path(File.join(ENV['RAILS_ROOT'], 'config/environment.rb'))
-
-require File.expand_path(File.join(__DIR__, '..', 'init'))
+require File.expand_path(File.join(__DIR__, '..', '..', 'init'))

@@ -1,4 +1,5 @@
-require 'activesupport'
+require 'active_support'
+require 'action_controller'
 require 'atom' # TODO: add ratom _dependency_
 
 __DIR__ = File.dirname(__FILE__)
