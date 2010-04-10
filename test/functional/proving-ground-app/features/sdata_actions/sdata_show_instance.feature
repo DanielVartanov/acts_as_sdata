@@ -23,3 +23,19 @@ Feature: Get SData instance
         | If-None-Match | 686897696a7c876b7e |
     Then response status should be 200 (OK)
     And response should contain Atom entry
+
+  Scenario: SData entry contains a payload info
+    Given there is an item with the following properties:
+        | Name | First                                |
+        | UUID | 88815929-A503-4fcb-B5CC-F1BB8ECFC874 |
+    When I get /items/!1
+    Then XML document should contain the following at XPath /payload:
+        """
+        <payload xmlns="http://schemas.sage.com/sdata/2008/1">
+            <tradingAccount
+              sdata:uuid="88815929-A503-4fcb-B5CC-F1BB8ECFC874"
+              sdata:url="http://www.billingboss.com/myApp/myContract/-/tradingAccounts/!First"
+              xmlns="xmlns="http://schemas.sage.com/crmErp"
+            />
+        </payload>
+        """
