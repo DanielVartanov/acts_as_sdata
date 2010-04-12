@@ -29,7 +29,7 @@ Feature: Get SData instance
         | Name | First                                |
         | UUID | 88815929-A503-4fcb-B5CC-F1BB8ECFC874 |
     When I get /items/!1
-    Then XML document should contain the following at XPath /payload:
+    Then XML document should contain the following at XPath /content/payload:
         """
         <payload xmlns="http://schemas.sage.com/sdata/2008/1">
             <tradingAccount
