@@ -1,0 +1,17 @@
+require File.join(File.dirname(__FILE__), '..', 'spec_helper')
+
+include SData
+
+describe AtomEntryMixin, "#payload" do
+  context "given an Atom::Entry with AtomEntryMixin included" do
+    before :each do
+      Atom::Entry.send :include, AtomEntryMixin
+      @entry = Atom::Entry.new
+    end
+
+    it "should respond to payload getter and setter" do
+      @entry.should respond_to(:payload)
+      @entry.should respond_to(:payload=)
+    end
+  end
+end
