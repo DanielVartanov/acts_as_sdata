@@ -1,11 +1,9 @@
+
 module SData
   module AtomEntryMixin
+    Atom::Entry.element :payload, :class => Atom::Content
     def self.included(base)
       base.send :attr_accessor
-    end
-
-    def payload=(value)
-      self.content = Atom::Content::Xhtml.new(value.to_xml)
     end
 
     def to_attributes
