@@ -40,8 +40,11 @@ module SData
       @controller_with_namespace ||= "#{namespace}#{controller}"
     end
 
+    #was: @namespace ||= ("#{options[:namespace]}/" || "")
+    #but if options[:namespace] is nil, then "#{nil}/" == "/" == !false,
+    #so it'd return "/" instead of "" as required
     def namespace
-      @namespace ||= ("#{options[:namespace]}/" || "")
+      @namespace ||= (options[:namespace] ? "#{options[:namespace]}/" : "")
     end
 
     def controller

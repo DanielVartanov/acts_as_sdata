@@ -18,8 +18,10 @@ module SData
       def to_atom
         returning Atom::Entry.new do |entry|
           entry.title = entry_title
-          entry.summary = entry_summary
-          add_attributes(entry)
+          entry.updated = self.updated_at
+          entry.authors << Atom::Person.new(:name => self.created_by.sage_username)
+          entry.payload = Atom::Content::Payload.new(payload)
+          #add_headers(entry)
         end
       end
 
@@ -43,14 +45,42 @@ module SData
         self.class.name
       end
 
-      def add_attributes(entry)
-        self.attributes.each_pair do |name, value|
-          entry['sdata', name] << value
-        end
+      def add_headers(entry)
+        
+      end
+
+      def add_payload(entry)
+        entry.payload = self
+#        self.attributes.each_pair do |name, value|
+#          entry['sdata', name] << value
+#        end
         #entry['sdata', 'sdata'] << ta.to_xml(true, 'TradingAccount')
+      end
+      
+      #security issue - value must be escaped from any internal html tags
+      def payload
+        builder = Builder::XmlMarkup.new
+        xml = builder.__send__(self.class.to_s.demodulize.camelize(:lower)) do |payload| 
+          self.attributes.each_pair do |name, value|
+            if value
+              payload.__send__("#{name}") do |asdf|
+                asdf << value.to_s
+              end
+            else
+              payload.__send__("#{name}", 'xlmns:xsi:nil' => 'true')
+            end          
+          end
+        end
+        xml
+#        class_title = self.class.to_s.demodulize.camelize(:lower)
+#        str = "<#{class_title}>"
+#        self.attributes.each_pair do |name, value|
+#          str += "<#{name}>#{value}</#{name}>"
+#        end
+#        str += "</#{class_title}>"
+#        str
       end
     end
   end
 end
-
 ActiveRecord::Base.extend SData::ActiveRecordMixin
