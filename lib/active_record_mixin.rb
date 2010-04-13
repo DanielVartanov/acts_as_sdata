@@ -44,30 +44,20 @@ module SData
       def default_entry_content
         self.class.name
       end
-
-      def add_headers(entry)
-        
-      end
-
-      def add_payload(entry)
-        entry.payload = self
-#        self.attributes.each_pair do |name, value|
-#          entry['sdata', name] << value
-#        end
-        #entry['sdata', 'sdata'] << ta.to_xml(true, 'TradingAccount')
-      end
       
-      #security issue - value must be escaped from any internal html tags
+      #TODO: change attributes.each_pair to whatever logic is required to decide which attributes to send
+      #probably the logic will be virtual model-based
+      #TODO: populate self-links for attributes that have them. probably logic is virtual-model-based as well
       def payload
         builder = Builder::XmlMarkup.new
         xml = builder.__send__(self.class.to_s.demodulize.camelize(:lower)) do |payload| 
           self.attributes.each_pair do |name, value|
             if value
-              payload.__send__("#{name}") do |asdf|
-                asdf << value.to_s
+              payload.__send__(name) do |element|
+                element << value.to_s
               end
             else
-              payload.__send__("#{name}", 'xlmns:xsi:nil' => 'true')
+              payload.__send__(name, 'xlmns:xsi:nil' => 'true')
             end          
           end
         end
