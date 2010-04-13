@@ -21,6 +21,7 @@ module SData
           entry.updated = self.updated_at
           entry.authors << Atom::Person.new(:name => self.created_by.sage_username)
           entry.payload = Atom::Content::Payload.new(payload)
+          entry.content = sdata_content
           #add_headers(entry)
         end
       end
