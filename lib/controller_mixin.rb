@@ -54,7 +54,7 @@ module SData
         end
 
         def build_sdata_feed
-          Namespace.add_feed_extension_namespaces(%w{sdata http opensearch sle xsi})
+          Namespace.add_feed_extension_namespaces(%w{crmErp sdata http opensearch sle xsi})
           Atom::Feed.new do |f|
             f.title = sdata_options[:feed][:title]
             f.links << Atom::Link.new(:href => 'http://example.com' + sdata_options[:feed][:path])

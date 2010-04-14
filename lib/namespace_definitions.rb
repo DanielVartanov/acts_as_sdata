@@ -2,6 +2,7 @@ module SData
   class Namespace
     #TODO: yaml file is probably better for the definitions
     @@sdata_schemas = { 
+                           "crmErp"     => "http://schemas.sage.com/crmErp",
                            "http"       => "http://schemas.sage.com/sdata/http/2008/1",
                            "opensearch" => "http://a9.com/-/spec/opensearch/1.1",
                            "sdata"      => "http://schemas.sage.com/sdata/2008/1",
