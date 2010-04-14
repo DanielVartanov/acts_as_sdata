@@ -50,45 +50,37 @@ module SData
         "xmlns:crmErp:#{self.class.to_s.demodulize.camelize(:lower)}"
       end
       
-      #TODO: change attributes.each_pair to whatever logic is required to decide which attributes to send
-      #probably the logic will be virtual model-based
-      #TODO: populate self-links for attributes that have them. probably logic is virtual-model-based as well
-      #TODO: security audit for how xml syntax tags (e.g. <>) from user data are escaped (or not). they should be!
+      #TODO: populate self-links for attributes that have them. probably logic is virtual-model-based
+      #TODO: security audit for how xml syntax tags from user data are escaped (or not). they should be!
 
-      def payload(builder=nil, node=self, output=nil)
-        if !builder
-          builder = Builder::XmlMarkup.new
-          xml = payload(builder)
-        else
-          if node.is_a?(ActiveRecord::Base)
-            builder.__send__(payload_class, "xlmns:sdata:key" => self.id) do |output|           
-              self.payload_map.each_key do |name|
-                self.payload(builder,{name => payload_map[name]}, output)
+      def payload(node=self, output=nil)
+        builder = Builder::XmlMarkup.new
+        if node.is_a?(ActiveRecord::Base)
+          builder.__send__(payload_class, "xlmns:sdata:key" => self.id) do |output|           
+            self.payload_map.each_key do |name|
+              self.payload({name => payload_map[name]}, output)
+            end
+          end
+        elsif node.is_a?(Hash) #FIXME: differentiate between object-attr hashes and hashes from the map
+          key = node.keys[0]
+          value = node.values[0][:value]
+          if value
+            output.__send__(key) do |element|
+              if value.is_a?(ActiveRecord::Base)
+                element << value.payload
+              else
+                if value.is_a?(Array)
+                  value.each do |item|
+                    element << item.payload
+                  end
+                else
+                  element << value.to_s
+                end                
               end
             end
-          elsif node.is_a?(Hash) #FIXME: differentiate between object-attr hashes and hashes from the map
-            key = node.keys[0]
-            value = node.values[0][:value]
-              if value
-                output.__send__(key) do |element|
-          
-                if value.is_a?(ActiveRecord::Base)
-                  element << value.payload
-                else
-                  if value.is_a?(Array)
-                    value.each do |item|
-                      element << item.payload
-                    end
-                  else
-                    element << value.to_s
-                  end                
-                end
-                end
-
-              else
-              output.__send__(key, 'xlmns:xsi:nil' => "true") 
-            end            
-          end
+          else
+            output.__send__(key, 'xlmns:xsi:nil' => "true") 
+          end            
         end
       end
     end
