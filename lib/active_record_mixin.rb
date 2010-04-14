@@ -46,23 +46,56 @@ module SData
         self.class.name
       end
       
+      def payload_class
+        "xmlns:crmErp:#{self.class.to_s.demodulize.camelize(:lower)}"
+      end
+      
       #TODO: change attributes.each_pair to whatever logic is required to decide which attributes to send
       #probably the logic will be virtual model-based
       #TODO: populate self-links for attributes that have them. probably logic is virtual-model-based as well
-      def payload
-        builder = Builder::XmlMarkup.new
-        xml = builder.__send__(self.class.to_s.demodulize.camelize(:lower)) do |payload| 
-          self.attributes.each_pair do |name, value|
-            if value
-              payload.__send__(name) do |element|
-                element << value.to_s
+      #TODO: security audit for how xml syntax tags (e.g. <>) from user data are escaped (or not). they should be!
+
+      def payload(builder=nil, node=self, output=nil)
+        if !builder
+          builder = Builder::XmlMarkup.new
+          xml = payload(builder)
+        else
+          if node.is_a?(ActiveRecord::Base)
+            builder.__send__(payload_class, "xlmns:sdata:key" => self.id) do |output|           
+              self.payload_map.each_key do |name|
+                self.payload(builder,{name => payload_map[name]}, output)
               end
-            else
-              payload.__send__(name, 'xlmns:xsi:nil' => 'true')
-            end          
+            end
+          elsif node.is_a?(Hash) #FIXME: differentiate between object-attr hashes and hashes from the map
+            key = node.keys[0]
+            value = node.values[0][:value]
+              if value
+                output.__send__(key) do |element|
+          
+                if value.is_a?(ActiveRecord::Base)
+                  element << value.payload
+                else
+                  if value.is_a?(Array)
+                    value.each do |item|
+                      element << item.payload
+                    end
+                  else
+                    element << value.to_s
+                  end                
+                end
+                end
+
+              else
+              output.__send__(key, 'xlmns:xsi:nil' => "true") 
+            end            
           end
         end
-        xml
+      end
+    end
+  end
+end
+ActiveRecord::Base.extend SData::ActiveRecordMixin
+
 #        class_title = self.class.to_s.demodulize.camelize(:lower)
 #        str = "<#{class_title}>"
 #        self.attributes.each_pair do |name, value|
@@ -70,8 +103,3 @@ module SData
 #        end
 #        str += "</#{class_title}>"
 #        str
-      end
-    end
-  end
-end
-ActiveRecord::Base.extend SData::ActiveRecordMixin
