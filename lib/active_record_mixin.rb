@@ -20,9 +20,8 @@ module SData
           entry.title = entry_title
           entry.updated = self.updated_at
           entry.authors << Atom::Person.new(:name => self.created_by.sage_username)
-          entry.payload = Atom::Content::Payload.new(payload)
+          entry.payload = Atom::Content::Payload.new(payload({self.class.to_s.demodulize.camelize(:lower) => self}))
           entry.content = sdata_content
-          #add_headers(entry)
         end
       end
 
@@ -46,43 +45,35 @@ module SData
         self.class.name
       end
       
-      def payload_class
-        "xmlns:crmErp:#{self.class.to_s.demodulize.camelize(:lower)}"
+      def xmlns_qualifier_for(entity)
+        "xmlns:crmErp:#{entity.to_s.demodulize.camelize(:lower)}"
       end
       
       #TODO: populate self-links for attributes that have them. probably logic is virtual-model-based
       #TODO: security audit for how xml syntax tags from user data are escaped (or not). they should be!
 
-      def payload(node=self, output=nil)
+      def payload(node, options={})
         builder = Builder::XmlMarkup.new
-        if node.is_a?(ActiveRecord::Base)
-          builder.__send__(payload_class, "xlmns:sdata:key" => self.id) do |output|           
-            self.payload_map.each_key do |name|
-              self.payload({name => payload_map[name]}, output)
+        qualified_attribute = options[:qualified_attribute]
+        key = node.keys.first
+        value = node.values.first.is_a?(Hash) ? node.values.first[:value] : node.values.first
+        if value.is_a?(Array)
+          builder.__send__(xmlns_qualifier_for(key)) do |element|
+            value.each do |item|
+              element << self.payload({key.to_s.singularize => item})
+            end                
+          end
+        elsif value.respond_to?('payload')
+          builder.__send__(value.xmlns_qualifier_for(key), "xlmns:sdata:key" => value.id) do |output|           
+            value.payload_map.each_key do |name|
+              output << value.payload({name => value.payload_map[name]})
             end
           end
-        elsif node.is_a?(Hash) #FIXME: differentiate between object-attr hashes and hashes from the map
-          key = node.keys[0]
-          value = node.values[0][:value]
-          if value
-            output.__send__(key) do |element|
-              if value.is_a?(ActiveRecord::Base)
-                element << value.payload
-              else
-                if value.is_a?(Array)
-                  value.each do |item|
-                    element << item.payload
-                  end
-                else
-                  element << value.to_s
-                end                
-              end
-            end
-          else
-            output.__send__(key, 'xlmns:xsi:nil' => "true") 
-          end            
+        else
+          builder.__send__(xmlns_qualifier_for(key), (value ? value.to_s : {'xlmns:xsi:nil' => "true"})) 
         end
       end
+      
     end
   end
 end
