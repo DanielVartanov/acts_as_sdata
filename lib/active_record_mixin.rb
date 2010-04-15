@@ -54,7 +54,6 @@ module SData
 
       def payload(node, options={})
         builder = Builder::XmlMarkup.new
-        qualified_attribute = options[:qualified_attribute]
         key = node.keys.first
         value = node.values.first.is_a?(Hash) ? node.values.first[:value] : node.values.first
         if value.is_a?(Array)
