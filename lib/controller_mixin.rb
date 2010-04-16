@@ -96,7 +96,9 @@ module SData
             predicate = SData::Predicate.parse(CGI::unescape(params[:predicate]))
             options[:conditions] = predicate.to_conditions
           end
-          #this is an unoptimized solution that may be a bottleneck for large number of matches
+          #FIXME: this is an unoptimized solution that may be a bottleneck for large number of matches
+          #if user has hundreds of records but requests first 10, we shouldnt load them all into memory
+          #but use sql query to count how many exist in total, and then load the first 10 only
           results = sdata_options[:model].all(options)
           @total_results = results.count
           paginated_results = results[zero_based_start_index,records_to_return]
