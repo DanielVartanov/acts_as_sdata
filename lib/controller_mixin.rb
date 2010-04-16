@@ -71,6 +71,7 @@ module SData
         end
 
         def records_to_return
+          return sdata_options[:feed][:default_items_per_page] if params[:itemsPerPage].blank?
           items_per_page = [params[:itemsPerPage].to_i, sdata_options[:feed][:maximum_items_per_page]].min
           items_per_page = sdata_options[:feed][:default_items_per_page] if (items_per_page < 0)
           items_per_page
@@ -107,6 +108,10 @@ module SData
         
         #test cases (need to write formally). assume :default_items_per_page = 10 and :maximum_items_per_page = 100
         #empty params: itemsPerPage returns 10
+        #?itemsPerPage returns 10
+        #?itemsPerPage= returns 10
+        #?itemsPerPage=-1 or itemsPerPage=asdf returns 0 - may not be best choice (should be 10) but must support next case as well
+        #?itemsPerPage=0 returns 0 ('asdf'.to_i -> 0 and this makes supporting above case more difficult) 
         #?itemsPerPage=1: itemsPerPage returns 10
         #?itemsPerPage=20: itemsPerPage returns 20
         #?itemsPerPage=200: itemsPerPage returns 100
