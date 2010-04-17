@@ -57,16 +57,22 @@ module SData
 
       def payload(node_name, node_value)
         builder = Builder::XmlMarkup.new
-        if node_value.is_a?(Array)
+        if node_value.respond_to?('payload_map')
+          builder.__send__(node_value.xmlns_qualifier_for(node_name), "xlmns:sdata:key" => node_value.id) do |element|           
+            node_value.payload_map.each_pair do |child_node_name, child_node_data|
+              element << node_value.payload(child_node_name, child_node_data[:value])
+            end
+          end
+        elsif node_value.is_a?(Array)
           builder.__send__(xmlns_qualifier_for(node_name)) do |element|
             node_value.each do |item|
               element << self.payload(node_name.to_s.singularize, item)
             end                
           end
-        elsif node_value.respond_to?('payload_map')
-          builder.__send__(node_value.xmlns_qualifier_for(node_name), "xlmns:sdata:key" => node_value.id) do |element|           
-            node_value.payload_map.each_pair do |child_node_name, child_node_data|
-              element << node_value.payload(child_node_name, child_node_data[:value])
+        elsif node_value.is_a?(Hash)
+          builder.__send__(xmlns_qualifier_for(node_name)) do |element|           
+            node_value.each_pair do |child_node_name, child_node_data|
+              element << self.payload(child_node_name, child_node_data)
             end
           end
         else

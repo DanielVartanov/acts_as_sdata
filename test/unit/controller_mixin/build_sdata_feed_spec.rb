@@ -17,6 +17,12 @@ describe ControllerMixin, "#build_sdata_feed" do
 
     before :each do
       @controller = Base.new
+      @controller.stub! :request => OpenStruct.new(
+                                    :protocol => 'http', 
+                                    :host_with_port => 'http://example.com', 
+                                    :request_uri => Base.sdata_options[:feed][:path])
+
+                                    
     end
     
     it "should return Atom::Feed instance" do
