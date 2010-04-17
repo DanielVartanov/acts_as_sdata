@@ -1,3 +1,4 @@
+
 def setup_active_record
   ActiveRecord::Base.establish_connection :adapter => "sqlite3",
     :database  => ":memory:"
@@ -6,8 +7,8 @@ end
 require 'atom'
 require 'active_record'
 require 'action_pack'
-
 require 'webrat'
+
 include Webrat::Matchers
 
 setup_active_record

@@ -30,7 +30,11 @@ describe ControllerMixin, "#sdata_collection" do
 
       before :each do
         @controller = Base.new
-        @controller.stub! :sdata_scope => Model.all
+        @controller.stub! :sdata_scope => Model.all, 
+                          :request => OpenStruct.new(
+                            :protocol => 'http', 
+                            :host_with_port => 'http://example.com', 
+                            :request_uri => Base.sdata_options[:feed][:path])
       end
 
       # TODO: doesn't seem as a useful test
