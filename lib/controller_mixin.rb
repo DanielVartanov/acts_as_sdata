@@ -13,6 +13,7 @@ module SData
           collection = build_sdata_feed
           collection.entries += sdata_scope.map(&:to_atom)
           populate_open_search_for(collection)
+          build_feed_links_for(collection)
           render :xml => collection, :content_type => "application/atom+xml; type=feed"
         end
 
@@ -53,11 +54,52 @@ module SData
           self.class.sdata_options[:model]
         end
 
+        def build_feed_links_for(feed)
+          feed.links << Atom::Link.new(:rel => 'self', 
+                                       :href => (request.protocol + request.host_with_port + request.request_uri), 
+                                       :type => 'applicaton/atom+xml; type=feed', 
+                                       :title => 'Refresh')
+          if (records_to_return > 0) && (@total_results > 0)
+            feed.links << Atom::Link.new(:rel => 'first', 
+                                         :href => (request.protocol + 
+                                                   request.host_with_port + 
+                                                   request.path + 
+                                                   "?#{request.query_parameters.merge(:startIndex => '1').to_param}"), 
+                                         :type => 'applicaton/atom+xml; type=feed', 
+                                         :title => 'First Page')
+            feed.links << Atom::Link.new(:rel => 'last', 
+                                         :href => (request.protocol + 
+                                                   request.host_with_port + 
+                                                   request.path + 
+                                                   "?#{request.query_parameters.merge(:startIndex => (@last=(@total_results - records_to_return + 1))).to_param}"), 
+                                         :type => 'applicaton/atom+xml; type=feed', 
+                                         :title => 'Lasts Page')
+            if (one_based_start_index+records_to_return) <= @total_results
+              feed.links << Atom::Link.new(:rel => 'next', 
+                                           :href => (request.protocol + 
+                                                     request.host_with_port + 
+                                                     request.path + 
+                                                     "?#{request.query_parameters.merge(:startIndex => [1,[@last, (one_based_start_index+records_to_return)].min].max.to_s).to_param}"), 
+                                           :type => 'applicaton/atom+xml; type=feed', 
+                                           :title => 'Next Page')
+            end
+            if (one_based_start_index > 1)
+              feed.links << Atom::Link.new(:rel => 'previous', 
+                                           :href => (request.protocol + 
+                                                     request.host_with_port + 
+                                                     request.path + 
+                                                     "?#{request.query_parameters.merge(:startIndex => [1,[@last, (one_based_start_index-records_to_return)].min].max.to_s).to_param}"), 
+                                           :type => 'applicaton/atom+xml; type=feed', 
+                                           :title => 'Previous Page')
+            end
+          end
+        end
+
         def build_sdata_feed
+          path = request.protocol + request.host_with_port + request.request_uri
           Namespace.add_feed_extension_namespaces(%w{crmErp sdata http opensearch sle xsi})
           Atom::Feed.new do |f|
             f.title = sdata_options[:feed][:title]
-            f.links << Atom::Link.new(:href => 'http://example.com' + sdata_options[:feed][:path])
             f.updated = Time.now
             f.authors << Atom::Person.new(:name => sdata_options[:feed][:author])
             f.id = request.protocol + request.host_with_port + request.request_uri
@@ -71,8 +113,8 @@ module SData
         end
 
         def records_to_return
-          return sdata_options[:feed][:default_items_per_page] if params[:itemsPerPage].blank?
-          items_per_page = [params[:itemsPerPage].to_i, sdata_options[:feed][:maximum_items_per_page]].min
+          return sdata_options[:feed][:default_items_per_page] if params[:count].blank?
+          items_per_page = [params[:count].to_i, sdata_options[:feed][:maximum_items_per_page]].min
           items_per_page = sdata_options[:feed][:default_items_per_page] if (items_per_page < 0)
           items_per_page
         end
@@ -90,7 +132,6 @@ module SData
         end
 
         def sdata_scope
-
           options = {}
 
           if params.key? :predicate
@@ -103,18 +144,18 @@ module SData
           results = sdata_options[:model].all(options)
           @total_results = results.count
           paginated_results = results[zero_based_start_index,records_to_return]
-          paginated_results
+          paginated_results.to_a
         end
         
         #test cases (need to write formally). assume :default_items_per_page = 10 and :maximum_items_per_page = 100
         #empty params: itemsPerPage returns 10
-        #?itemsPerPage returns 10
-        #?itemsPerPage= returns 10
-        #?itemsPerPage=-1 or itemsPerPage=asdf returns 0 - may not be best choice (should be 10) but must support next case as well
-        #?itemsPerPage=0 returns 0 ('asdf'.to_i -> 0 and this makes supporting above case more difficult) 
-        #?itemsPerPage=1: itemsPerPage returns 10
-        #?itemsPerPage=20: itemsPerPage returns 20
-        #?itemsPerPage=200: itemsPerPage returns 100
+        #?count returns 10
+        #?count= returns 10
+        #?count=-1 or itemsPerPage=asdf returns 0 - may not be best choice (should be 10) but must support next case as well
+        #?count=0 returns 0 ('asdf'.to_i -> 0 and this makes supporting above case more difficult) 
+        #?count=1: itemsPerPage returns 10
+        #?count=20: itemsPerPage returns 20
+        #?count=200: itemsPerPage returns 100
         #test cases where startindex or itemsperpage passed is invalid or NaN
         def populate_open_search_for(feed)
             feed[SData::Namespace::sdata_schemas['opensearch'], 'totalResults'] << @total_results

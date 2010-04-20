@@ -20,7 +20,7 @@ module SData
           entry.title = entry_title
           entry.updated = self.updated_at
           entry.authors << Atom::Person.new(:name => self.created_by.sage_username)
-          entry.payload = Atom::Content::Payload.new(self.payload(self.sdata_node_name, self))
+          entry.payload = Atom::Content::Payload.new(self.payload(self.sdata_node_name, self, :all, 3, 3))
           entry.content = sdata_content
         end
       end
@@ -52,27 +52,40 @@ module SData
       def sdata_node_name(entity=self.class)
         entity.to_s.demodulize.camelize(:lower)
       end
-      #TODO: populate self-links for attributes that have them. probably logic is virtual-model-based
       #TODO: security audit for how xml syntax tags from user data are escaped (or not). they should be!
 
-      def payload(node_name, node_value)
+      def payload(node_name, node_value, expand, element_priority, minimum_priority )
+        return "" if element_priority < minimum_priority
         builder = Builder::XmlMarkup.new
         if node_value.respond_to?('payload_map')
           builder.__send__(node_value.xmlns_qualifier_for(node_name), "xlmns:sdata:key" => node_value.id) do |element|           
-            node_value.payload_map.each_pair do |child_node_name, child_node_data|
-              element << node_value.payload(child_node_name, child_node_data[:value])
+            if expand != :none
+              node_value.payload_map.each_pair do |child_node_name, child_node_data|
+                if (expand == :immediate_children)
+                  child_expand = :none
+                else
+                  child_expand = child_node_data[:expand] || expand
+                end
+                element << node_value.payload(child_node_name, child_node_data[:value], child_expand, child_node_data[:priority], minimum_priority)
+              end
             end
           end
         elsif node_value.is_a?(Array)
           builder.__send__(xmlns_qualifier_for(node_name)) do |element|
-            node_value.each do |item|
-              element << self.payload(node_name.to_s.singularize, item)
-            end                
+            if expand != :none
+              expand = :none if expand == :immediate_children
+              node_value.each do |item|
+                element << self.payload(node_name.to_s.singularize, item, expand, element_priority, minimum_priority)
+              end
+            end
           end
         elsif node_value.is_a?(Hash)
-          builder.__send__(xmlns_qualifier_for(node_name)) do |element|           
-            node_value.each_pair do |child_node_name, child_node_data|
-              element << self.payload(child_node_name, child_node_data)
+          builder.__send__(xmlns_qualifier_for(node_name)) do |element|      
+            if expand != :none
+              expand = :none if expand == :immediate_children
+              node_value.each_pair do |child_node_name, child_node_data|
+                element << self.payload(child_node_name, child_node_data, expand, element_priority, minimum_priority)
+              end
             end
           end
         else
