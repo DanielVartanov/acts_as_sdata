@@ -52,7 +52,7 @@ module SData
     end
 
     def name_in_path
-      @name_in_path ||= resource_name.to_s.camelize.pluralize
+      @name_in_path ||= resource_name.to_s.camelize(:lower).pluralize
     end
 
     def formatted_paths?

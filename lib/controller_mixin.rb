@@ -11,7 +11,7 @@ module SData
       module Actions
         def sdata_collection
           collection = build_sdata_feed
-          collection.entries += sdata_scope.map(&:to_atom)
+          collection.entries += sdata_scope.map{|entry| entry.to_atom(params)}
           populate_open_search_for(collection)
           build_feed_links_for(collection)
           render :xml => collection, :content_type => "application/atom+xml; type=feed"
@@ -19,13 +19,13 @@ module SData
 
         def sdata_show_instance
           instance = model_class.find_by_sdata_instance_id(params[:instance_id])
-          render :xml => instance.to_atom, :content_type => "application/atom+xml; type=entry"
+          render :xml => instance.to_atom(params), :content_type => "application/atom+xml; type=entry"
         end
 
         def sdata_create_instance
           new_instance = model_class.new(params[:entry].to_attributes)
           if new_instance.save
-            render :xml => new_instance.to_atom.to_xml, :status => :created, :content_type => "application/atom+xml; type=entry"
+            render :xml => new_instance.to_atom(params).to_xml, :status => :created, :content_type => "application/atom+xml; type=entry"
           else
             render :xml => new_instance.errors.to_xml, :status => :bad_request
           end
@@ -37,7 +37,7 @@ module SData
           if request.fresh?(response)
             if instance.update_attributes(params[:entry].to_attributes)
               response.etag = [instance]
-              render :xml => instance.to_atom.to_xml, :content_type => "application/atom+xml; type=entry"
+              render :xml => instance.to_atom(params).to_xml, :content_type => "application/atom+xml; type=entry"
             else
               render :xml => instance.errors.to_xml, :status => :bad_request
             end
@@ -53,41 +53,37 @@ module SData
         def model_class
           self.class.sdata_options[:model]
         end
+        
+        def resource_address
+          request.protocol + request.host_with_port + request.path
+        end
 
         def build_feed_links_for(feed)
-          feed.links << Atom::Link.new(:rel => 'self', 
-                                       :href => (request.protocol + request.host_with_port + request.request_uri), 
-                                       :type => 'applicaton/atom+xml; type=feed', 
-                                       :title => 'Refresh')
+          feed.links << Atom::Link.new(    :rel => 'self', 
+                                           :href => (resource_address + "?#{request.query_parameters.to_param}".chomp('?')), 
+                                           :type => 'applicaton/atom+xml; type=feed', 
+                                           :title => 'Refresh')
           if (records_to_return > 0) && (@total_results > 0)
-            feed.links << Atom::Link.new(:rel => 'first', 
-                                         :href => (request.protocol + 
-                                                   request.host_with_port + 
-                                                   request.path + 
+            feed.links << Atom::Link.new(  :rel => 'first', 
+                                           :href => (resource_address + 
                                                    "?#{request.query_parameters.merge(:startIndex => '1').to_param}"), 
-                                         :type => 'applicaton/atom+xml; type=feed', 
-                                         :title => 'First Page')
-            feed.links << Atom::Link.new(:rel => 'last', 
-                                         :href => (request.protocol + 
-                                                   request.host_with_port + 
-                                                   request.path + 
-                                                   "?#{request.query_parameters.merge(:startIndex => (@last=(@total_results - records_to_return + 1))).to_param}"), 
-                                         :type => 'applicaton/atom+xml; type=feed', 
-                                         :title => 'Lasts Page')
+                                           :type => 'applicaton/atom+xml; type=feed', 
+                                           :title => 'First Page')
+            feed.links << Atom::Link.new(  :rel => 'last', 
+                                           :href => (resource_address + 
+                                                   "?#{request.query_parameters.merge(:startIndex => [1,(@last=(@total_results - records_to_return + 1))].max).to_param}"), 
+                                           :type => 'applicaton/atom+xml; type=feed', 
+                                           :title => 'Last Page')
             if (one_based_start_index+records_to_return) <= @total_results
               feed.links << Atom::Link.new(:rel => 'next', 
-                                           :href => (request.protocol + 
-                                                     request.host_with_port + 
-                                                     request.path + 
+                                           :href => (resource_address + 
                                                      "?#{request.query_parameters.merge(:startIndex => [1,[@last, (one_based_start_index+records_to_return)].min].max.to_s).to_param}"), 
                                            :type => 'applicaton/atom+xml; type=feed', 
                                            :title => 'Next Page')
             end
             if (one_based_start_index > 1)
               feed.links << Atom::Link.new(:rel => 'previous', 
-                                           :href => (request.protocol + 
-                                                     request.host_with_port + 
-                                                     request.path + 
+                                           :href => (resource_address + 
                                                      "?#{request.query_parameters.merge(:startIndex => [1,[@last, (one_based_start_index-records_to_return)].min].max.to_s).to_param}"), 
                                            :type => 'applicaton/atom+xml; type=feed', 
                                            :title => 'Previous Page')
@@ -96,14 +92,15 @@ module SData
         end
 
         def build_sdata_feed
-          path = request.protocol + request.host_with_port + request.request_uri
           Namespace.add_feed_extension_namespaces(%w{crmErp sdata http opensearch sle xsi})
           Atom::Feed.new do |f|
             f.title = sdata_options[:feed][:title]
             f.updated = Time.now
             f.authors << Atom::Person.new(:name => sdata_options[:feed][:author])
-            f.id = request.protocol + request.host_with_port + request.request_uri
-            
+            f.id = resource_address
+            f.categories << Atom::Category.new(:scheme => 'http://schemas.sage.com/sdata/categories',
+                                               :term   => 'collection',
+                                               :label  => 'Resource Collection')
             # FIXME: the sequence for generating namespace prefixes is abysmal, 
             # but only way I got atom to accept it. it's like taking an english sentence, translating it to 
             # french through an online translator, then to spanish, then back to english, and then using the 
