@@ -5,12 +5,20 @@ include SData
 describe ControllerMixin, "#sdata_scope" do
   describe "given a controller which acts as sdata" do
     before :all do
+      Model = Class.new
+      Model.stub! :all => [Model.new, Model.new]
       Base = Class.new(ActionController::Base)
       Base.extend ControllerMixin
+
       Base.__send__ :define_method, :sdata_scope, lambda { super }
       
-      Model = Class.new
-      Base.acts_as_sdata  :model => Model
+      
+      Base.acts_as_sdata  :model => Model, :feed => 
+                 {:author => 'Billing Boss',
+                  :path => '/trading_accounts',
+                  :title => 'Billing Boss | Trading Accounts',
+                  :default_items_per_page => 10,
+                  :maximum_items_per_page => 100}
     end
 
     before :each do

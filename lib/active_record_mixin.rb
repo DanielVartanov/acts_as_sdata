@@ -15,7 +15,8 @@ module SData
     end
 
     module InstanceMethods
-      def to_atom(params={})
+      def to_atom(params=nil)
+        params ||= {}
         maximum_precedence = (!params[:maximum_precedence].blank? ? params[:maximum_precedence].to_i : 100)
         included = params[:include].to_s.split(',')
         expand = (included.include?('$children') ? :all : :immediate_children)

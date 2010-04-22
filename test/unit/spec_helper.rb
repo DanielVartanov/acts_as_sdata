@@ -13,6 +13,9 @@ include Webrat::Matchers
 
 setup_active_record
 
+$APPLICATION_URL = "http://www.example.com"
+$SDATA_STORE_PATH = "/sdata/example/myContract/-/"
+
 __DIR__ =File.dirname(__FILE__)
 require File.expand_path(File.join(__DIR__, 'class_stubs', 'payload'))
 require File.expand_path(File.join(__DIR__, '..', '..', 'init'))

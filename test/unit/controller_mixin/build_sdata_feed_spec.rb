@@ -20,7 +20,8 @@ describe ControllerMixin, "#build_sdata_feed" do
       @controller.stub! :request => OpenStruct.new(
                                     :protocol => 'http', 
                                     :host_with_port => 'http://example.com', 
-                                    :request_uri => Base.sdata_options[:feed][:path])
+                                    :request_uri => Base.sdata_options[:feed][:path],
+                                    :path => $SDATA_STORE_PATH + '/testResource')
 
                                     
     end

@@ -59,34 +59,35 @@ module SData
         end
 
         def build_feed_links_for(feed)
-          feed.links << Atom::Link.new(    :rel => 'self', 
-                                           :href => (resource_address + "?#{request.query_parameters.to_param}".chomp('?')), 
-                                           :type => 'applicaton/atom+xml; type=feed', 
-                                           :title => 'Refresh')
+          feed.links << Atom::Link.new(    
+            :rel => 'self', 
+            :href => (resource_address + "?#{request.query_parameters.to_param}".chomp('?')), 
+            :type => 'applicaton/atom+xml; type=feed', 
+            :title => 'Refresh')
           if (records_to_return > 0) && (@total_results > 0)
-            feed.links << Atom::Link.new(  :rel => 'first', 
-                                           :href => (resource_address + 
-                                                   "?#{request.query_parameters.merge(:startIndex => '1').to_param}"), 
-                                           :type => 'applicaton/atom+xml; type=feed', 
-                                           :title => 'First Page')
-            feed.links << Atom::Link.new(  :rel => 'last', 
-                                           :href => (resource_address + 
-                                                   "?#{request.query_parameters.merge(:startIndex => [1,(@last=(@total_results - records_to_return + 1))].max).to_param}"), 
-                                           :type => 'applicaton/atom+xml; type=feed', 
-                                           :title => 'Last Page')
+            feed.links << Atom::Link.new(  
+              :rel => 'first', 
+              :href => (resource_address + "?#{request.query_parameters.merge(:startIndex => '1').to_param}"), 
+              :type => 'applicaton/atom+xml; type=feed', 
+              :title => 'First Page')
+            feed.links << Atom::Link.new(  
+              :rel => 'last', 
+              :href => (resource_address + "?#{request.query_parameters.merge(:startIndex => [1,(@last=(@total_results - records_to_return + 1))].max).to_param}"), 
+              :type => 'applicaton/atom+xml; type=feed', 
+              :title => 'Last Page')
             if (one_based_start_index+records_to_return) <= @total_results
-              feed.links << Atom::Link.new(:rel => 'next', 
-                                           :href => (resource_address + 
-                                                     "?#{request.query_parameters.merge(:startIndex => [1,[@last, (one_based_start_index+records_to_return)].min].max.to_s).to_param}"), 
-                                           :type => 'applicaton/atom+xml; type=feed', 
-                                           :title => 'Next Page')
+              feed.links << Atom::Link.new(
+                :rel => 'next', 
+                :href => (resource_address + "?#{request.query_parameters.merge(:startIndex => [1,[@last, (one_based_start_index+records_to_return)].min].max.to_s).to_param}"), 
+                :type => 'applicaton/atom+xml; type=feed', 
+                :title => 'Next Page')
             end
             if (one_based_start_index > 1)
-              feed.links << Atom::Link.new(:rel => 'previous', 
-                                           :href => (resource_address + 
-                                                     "?#{request.query_parameters.merge(:startIndex => [1,[@last, (one_based_start_index-records_to_return)].min].max.to_s).to_param}"), 
-                                           :type => 'applicaton/atom+xml; type=feed', 
-                                           :title => 'Previous Page')
+              feed.links << Atom::Link.new(
+                :rel => 'previous', 
+                :href => (resource_address + "?#{request.query_parameters.merge(:startIndex => [1,[@last, (one_based_start_index-records_to_return)].min].max.to_s).to_param}"), 
+                :type => 'applicaton/atom+xml; type=feed', 
+                :title => 'Previous Page')
             end
           end
         end
@@ -110,9 +111,11 @@ module SData
         end
 
         def records_to_return
-          return sdata_options[:feed][:default_items_per_page] if params[:count].blank?
-          items_per_page = [params[:count].to_i, sdata_options[:feed][:maximum_items_per_page]].min
-          items_per_page = sdata_options[:feed][:default_items_per_page] if (items_per_page < 0)
+          default_items_per_page = sdata_options[:feed][:default_items_per_page] || 10
+          maximum_items_per_page = sdata_options[:feed][:maximum_items_per_page] || 100
+          return default_items_per_page if params[:count].blank?
+          items_per_page = [params[:count].to_i, maximum_items_per_page].min
+          items_per_page = default_items_per_page if (items_per_page < 0)
           items_per_page
         end
 

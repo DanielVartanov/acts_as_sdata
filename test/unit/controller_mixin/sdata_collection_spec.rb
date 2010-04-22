@@ -5,11 +5,26 @@ include SData
 describe ControllerMixin, "#sdata_collection" do
   describe "given a model which acts as sdata" do
     before :all do
+      @time = Time.now - 1.day
       class Model
         extend ActiveRecordMixin
         acts_as_sdata
-
+        def id
+          1
+        end
         def attributes; {} end
+        def updated_at
+          @time
+        end
+        def created_by
+          OpenStruct.new(:id => 1, :sage_username => 'sage_user')
+        end
+        def name
+          "John Smith"
+        end
+        def sdata_content
+          "Model ##{self.id}: #{self.name}"
+        end
       end
 
       Model.stub! :all => [Model.new, Model.new]
@@ -25,7 +40,9 @@ describe ControllerMixin, "#sdata_collection" do
                             :feed => { :id => 'some-unique-id',
                                        :author => 'Test Author',
                                        :path => '/test_resource',
-                                       :title => 'List of Test Items' }
+                                       :title => 'List of Test Items',
+                                       :default_items_per_page => 10,
+                                       :maximum_items_per_page => 100}
       end
 
       before :each do
@@ -34,7 +51,11 @@ describe ControllerMixin, "#sdata_collection" do
                           :request => OpenStruct.new(
                             :protocol => 'http', 
                             :host_with_port => 'http://example.com', 
-                            :request_uri => Base.sdata_options[:feed][:path])
+                            :request_uri => Base.sdata_options[:feed][:path],
+                            :path => $SDATA_STORE_PATH + '/testResource',
+                            :query_parameters => {}),
+                          :params => {}
+       @controller.instance_variable_set("@total_results", 2)
       end
 
       # TODO: doesn't seem as a useful test
@@ -43,7 +64,7 @@ describe ControllerMixin, "#sdata_collection" do
         @controller.should_receive(:render) do |hash|
           hash[:content_type].should == "application/atom+xml; type=feed"
           hash[:xml].should be_kind_of(Atom::Feed)
-          hash[:xml].entries.should == Model.all.map(&:to_atom)
+          hash[:xml].entries.should == Model.all.map{|entry| entry.to_atom({})}
         end
         @controller.sdata_collection
       end
