@@ -133,11 +133,18 @@ module SData
 
         def sdata_scope
           options = {}
-
           if params.key? :predicate
             predicate = SData::Predicate.parse(CGI::unescape(params[:predicate]))
             options[:conditions] = predicate.to_conditions
           end
+          if params.key? :condition
+            options[:conditions] ||= []
+            if params[:condition] == "linked" && sdata_options[:model].sdata_options[:link]
+              condition = "#{sdata_options[:model].sdata_options[:link]} is not null"
+              options[:conditions][0] = [options[:conditions].to_a[0], condition].compact.join(' and ')
+            end
+          end
+
           #FIXME: this is an unoptimized solution that may be a bottleneck for large number of matches
           #if user has hundreds of records but requests first 10, we shouldnt load them all into memory
           #but use sql query to count how many exist in total, and then load the first 10 only

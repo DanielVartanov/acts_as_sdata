@@ -2,7 +2,9 @@ module SData
   class RouteMapper < Struct.new(:router, :resource_name, :options)
     def map_sdata_routes!
       map_sdata_collection
+      map_sdata_collection_with_condition
       map_sdata_collection_with_predicate
+      map_linked_sdata_collection_with_predicate_and_condition
       map_sdata_show_instance
       map_sdata_create_instance
       map_sdata_update_instance
@@ -13,9 +15,17 @@ module SData
     def map_sdata_collection
       map_route "#{name_in_path}", 'sdata_collection', :get
     end
-
+    
+    def map_sdata_collection_with_condition
+      map_route "#{name_in_path}\\$:condition", 'sdata_collection', :get
+    end
+    
     def map_sdata_collection_with_predicate
       map_route "#{name_in_path}\\(:predicate\\)", 'sdata_collection', :get
+    end
+    
+    def map_linked_sdata_collection_with_predicate_and_condition
+       map_route "#{name_in_path}\\(:predicate\\)\\$:condition", 'sdata_collection', :get
     end
 
     def map_sdata_show_instance
