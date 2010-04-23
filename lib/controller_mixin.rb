@@ -131,12 +131,15 @@ module SData
           [(one_based_start_index - 1), 0].max
         end
 
+        #(name eq 'asdf') -> options[:conditions] = ['"name" eq ?', 'asdf']
         def sdata_scope
           options = {}
           if params.key? :predicate
             predicate = SData::Predicate.parse(CGI::unescape(params[:predicate]))
             options[:conditions] = predicate.to_conditions
           end
+          #['"name" eq ?', 'asdf'] ->['"name" eq ? and simply_guid is not null', 'asdf']
+          #[] -> "simply guid is not null"
           if params.key? :condition
             options[:conditions] ||= []
             if params[:condition] == "linked" && sdata_options[:model].sdata_options[:link]
