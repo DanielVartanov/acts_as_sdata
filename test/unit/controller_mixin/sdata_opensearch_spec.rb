@@ -302,6 +302,7 @@ describe ControllerMixin, "#sdata_collection" do
             hash[:xml].opensearch("totalResults").should == 15
             hash[:xml].opensearch("startIndex").should == 9
             hash[:xml].entries.size.should == 7
+            verify_content_for(hash[:xml].entries, 9..15)
           end
           @controller.sdata_collection
         end  
