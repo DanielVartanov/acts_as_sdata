@@ -2,10 +2,19 @@ require File.join(File.dirname(__FILE__), '..', 'spec_helper')
 
 include SData
 
+module Atom
+  class Feed
+    def opensearch(key)
+      simple_extensions["{#{$SDATA_SCHEMAS["opensearch"]},#{key}}"][0]
+    end
+  end
+end
+
 describe ControllerMixin, "#sdata_collection" do
   describe "given a model which acts as sdata" do
     before :all do
       @time = Time.now - 1.day
+      
       class Model
         extend ActiveRecordMixin
         acts_as_sdata
@@ -26,8 +35,6 @@ describe ControllerMixin, "#sdata_collection" do
           "Model ##{self.id}: #{self.name}"
         end
       end
-
-      Model.stub! :all => [Model.new, Model.new]
     end
 
     describe "given a controller which acts as sdata" do
@@ -43,28 +50,36 @@ describe ControllerMixin, "#sdata_collection" do
                                        :title => 'List of Test Items',
                                        :default_items_per_page => 10,
                                        :maximum_items_per_page => 100}
+                                       
       end
 
       before :each do
         @controller = Base.new
-        @controller.stub! :sdata_scope => Model.all, 
-                          :request => OpenStruct.new(
+        @controller.stub! :request => OpenStruct.new(
                             :protocol => 'http', 
                             :host_with_port => 'http://example.com', 
                             :request_uri => Base.sdata_options[:feed][:path],
                             :path => $SDATA_STORE_PATH + '/testResource',
                             :query_parameters => {}),
                           :params => {}
-       @controller.instance_variable_set("@total_results", 2)
       end
 
-      # TODO: doesn't seem as a useful test
-
       it "should render Atom feed" do        
+        @controller.sdata_options[:model].stub! :all => [Model.new, Model.new]
         @controller.should_receive(:render) do |hash|
           hash[:content_type].should == "application/atom+xml; type=feed"
           hash[:xml].should be_kind_of(Atom::Feed)
           hash[:xml].entries.should == Model.all.map{|entry| entry.to_atom({})}
+        end
+        @controller.sdata_collection
+      end
+      
+      it "should should display default opensearch values for empty collection" do
+        @controller.sdata_options[:model].stub! :all => []
+        @controller.should_receive(:render) do |hash|
+          hash[:xml].opensearch("itemsPerPage").should == Base.sdata_options[:feed][:default_items_per_page]
+          hash[:xml].opensearch("totalResults").should == 0
+          hash[:xml].opensearch("startIndex").should == 1
         end
         @controller.sdata_collection
       end
