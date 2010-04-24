@@ -2,14 +2,6 @@ require File.join(File.dirname(__FILE__), '..', 'spec_helper')
 
 include SData
 
-module Atom
-  class Feed
-    def opensearch(key)
-      simple_extensions["{#{$SDATA_SCHEMAS["opensearch"]},#{key}}"][0]
-    end
-  end
-end
-
 describe ControllerMixin, "#sdata_collection" do
   describe "given a model which acts as sdata" do
     before :all do
@@ -70,16 +62,6 @@ describe ControllerMixin, "#sdata_collection" do
           hash[:content_type].should == "application/atom+xml; type=feed"
           hash[:xml].should be_kind_of(Atom::Feed)
           hash[:xml].entries.should == Model.all.map{|entry| entry.to_atom({})}
-        end
-        @controller.sdata_collection
-      end
-      
-      it "should should display default opensearch values for empty collection" do
-        @controller.sdata_options[:model].stub! :all => []
-        @controller.should_receive(:render) do |hash|
-          hash[:xml].opensearch("itemsPerPage").should == Base.sdata_options[:feed][:default_items_per_page]
-          hash[:xml].opensearch("totalResults").should == 0
-          hash[:xml].opensearch("startIndex").should == 1
         end
         @controller.sdata_collection
       end

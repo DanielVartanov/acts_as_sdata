@@ -159,16 +159,6 @@ module SData
           paginated_results.to_a
         end
         
-        #test cases (need to write formally). assume :default_items_per_page = 10 and :maximum_items_per_page = 100
-        #empty params: itemsPerPage returns 10
-        #?count returns 10
-        #?count= returns 10
-        #?count=-1 or itemsPerPage=asdf returns 0 - may not be best choice (should be 10) but must support next case as well
-        #?count=0 returns 0 ('asdf'.to_i -> 0 and this makes supporting above case more difficult) 
-        #?count=1: itemsPerPage returns 10
-        #?count=20: itemsPerPage returns 20
-        #?count=200: itemsPerPage returns 100
-        #test cases where startindex or itemsperpage passed is invalid or NaN
         def populate_open_search_for(feed)
             feed[SData::Namespace::sdata_schemas['opensearch'], 'totalResults'] << @total_results
             feed[SData::Namespace::sdata_schemas['opensearch'], 'startIndex'] << one_based_start_index
