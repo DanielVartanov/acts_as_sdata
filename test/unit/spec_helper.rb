@@ -18,4 +18,8 @@ $SDATA_STORE_PATH = "/sdata/example/myContract/-/"
 
 __DIR__ =File.dirname(__FILE__)
 require File.expand_path(File.join(__DIR__, 'class_stubs', 'payload'))
+require File.expand_path(File.join(__DIR__, 'class_stubs', 'model_base'))
+require File.expand_path(File.join(__DIR__, 'class_stubs', 'user'))
+require File.expand_path(File.join(__DIR__, 'class_stubs', 'customer'))
+require File.expand_path(File.join(__DIR__, 'class_stubs', 'contact'))
 require File.expand_path(File.join(__DIR__, '..', '..', 'init'))

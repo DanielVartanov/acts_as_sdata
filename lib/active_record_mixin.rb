@@ -17,14 +17,14 @@ module SData
     module InstanceMethods
       def to_atom(params=nil)
         params ||= {}
-        maximum_precedence = (!params[:maximum_precedence].blank? ? params[:maximum_precedence].to_i : 100)
+        maximum_precedence = (!params[:precedence].blank? ? params[:precedence].to_i : 100)
         included = params[:include].to_s.split(',')
         expand = (included.include?('$children') ? :all : :immediate_children)
         returning Atom::Entry.new do |entry|
           entry.id = self.sdata_resource_url
           entry.title = entry_title
           entry.updated = self.updated_at
-          entry.authors << Atom::Person.new(:name => self.created_by.sage_username)
+          entry.authors << Atom::Person.new(:name => self.respond_to?('author') ? self.author : sdata_default_author)
           entry.links << Atom::Link.new(:rel => 'self', 
                                         :href => self.sdata_resource_url, 
                                         :type => 'applicaton/atom+xml; type=entry', 
@@ -41,6 +41,9 @@ module SData
 
     protected
 
+      def sdata_default_author
+        "Billing Boss"
+      end
       def sdata_resource_url
         $APPLICATION_URL + $SDATA_STORE_PATH + sdata_node_name.pluralize + "('#{self.id}')"
       end
@@ -90,7 +93,7 @@ module SData
             if (expand != :none) || included.include?(node_name.to_s.camelize(:lower))
               node_value.payload_map.each_pair do |child_node_name, child_node_data|
                 expand = :none if (expand == :immediate_children) 
-                element << node_value.payload(child_node_name, child_node_data[:value], expand, included, child_node_data[:precedence], maximum_precedence, child_node_data[:resource_collection])
+                element << node_value.payload(child_node_name.to_s.camelize(:lower), child_node_data[:value], expand, included, child_node_data[:precedence], maximum_precedence, child_node_data[:resource_collection])
               end
             end
           end
@@ -101,7 +104,7 @@ module SData
               if (expand != :none) || included.include?(node_name.to_s.camelize(:lower))
                 expand = :none if (expand == :immediate_children) 
                 node_value.each do |item|
-                  element << self.payload(node_name.to_s.singularize, item, expand, included, element_precedence, maximum_precedence)
+                  element << self.payload(node_name.to_s.singularize.camelize(:lower), item, expand, included, element_precedence, maximum_precedence)
                 end
               end
             end
@@ -109,7 +112,7 @@ module SData
             builder.__send__(xmlns_qualifier_for(node_name)) do |element|
               expand = :none if (expand == :immediate_children) 
               node_value.each do |item|
-                element << self.payload(node_name.to_s.singularize, item, expand, included, element_precedence, maximum_precedence)
+                element << self.payload(node_name.to_s.singularize, item, expand, included, element_precedence, maximum_precedence, (item.is_a?(Hash) ? item[:resource_collection] : nil))
               end
             end            
           end
@@ -117,11 +120,11 @@ module SData
           builder.__send__(xmlns_qualifier_for(node_name)) do |element|      
             expand = :none if (expand == :immediate_children) 
             node_value.each_pair do |child_node_name, child_node_data|
-              element << self.payload(child_node_name, child_node_data, expand, included, element_precedence, maximum_precedence)
+              element << self.payload(child_node_name.to_s.camelize(:lower), child_node_data, expand, included, element_precedence, maximum_precedence, (child_node_data.is_a?(Hash) ? child_node_data[:resource_collection] : nil))
             end
           end
         else
-          builder.__send__(xmlns_qualifier_for(node_name), (node_value ? node_value.to_s : {'xlmns:xsi:nil' => "true"})) 
+          builder.__send__(xmlns_qualifier_for(node_name.to_s.camelize(:lower)), (node_value ? node_value.to_s : {'xlmns:xsi:nil' => "true"})) 
         end
       end
       
