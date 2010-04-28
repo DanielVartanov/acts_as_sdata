@@ -64,15 +64,16 @@ module SData
             :href => (resource_address + "?#{request.query_parameters.to_param}".chomp('?')), 
             :type => 'applicaton/atom+xml; type=feed', 
             :title => 'Refresh')
-          if (records_to_return > 0) && (@total_results > 0)
+          if (records_to_return > 0) && (@total_results > records_to_return)
             feed.links << Atom::Link.new(  
               :rel => 'first', 
               :href => (resource_address + "?#{request.query_parameters.merge(:startIndex => '1').to_param}"), 
               :type => 'applicaton/atom+xml; type=feed', 
               :title => 'First Page')
+            #L = (T-1)-((T-1)%P)+1 = (T-1)/P*P+1, L=start index of last page, T=total results, P=results per page 
             feed.links << Atom::Link.new(  
               :rel => 'last', 
-              :href => (resource_address + "?#{request.query_parameters.merge(:startIndex => [1,(@last=(@total_results - records_to_return + 1))].max).to_param}"), 
+              :href => (resource_address + "?#{request.query_parameters.merge(:startIndex => [1,(@last=(((@total_results-zero_based_start_index - 1) / records_to_return * records_to_return) + zero_based_start_index + 1))].max).to_param}"), 
               :type => 'applicaton/atom+xml; type=feed', 
               :title => 'Last Page')
             if (one_based_start_index+records_to_return) <= @total_results
@@ -113,7 +114,8 @@ module SData
         def records_to_return
           default_items_per_page = sdata_options[:feed][:default_items_per_page] || 10
           maximum_items_per_page = sdata_options[:feed][:maximum_items_per_page] || 100
-          return default_items_per_page if params[:count].blank?
+          #check whether the count param is castable into integer
+          return default_items_per_page if params[:count].blank? or (params[:count].to_i.to_s != params[:count])
           items_per_page = [params[:count].to_i, maximum_items_per_page].min
           items_per_page = default_items_per_page if (items_per_page < 0)
           items_per_page
