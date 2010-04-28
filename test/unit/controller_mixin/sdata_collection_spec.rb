@@ -54,10 +54,11 @@ describe ControllerMixin, "#sdata_collection" do
                             :path => $SDATA_STORE_PATH + '/testResource',
                             :query_parameters => {}),
                           :params => {}
+        @controller.sdata_options[:model].stub! :all => [Model.new, Model.new]
       end
 
       it "should render Atom feed" do        
-        @controller.sdata_options[:model].stub! :all => [Model.new, Model.new]
+
         @controller.should_receive(:render) do |hash|
           hash[:content_type].should == "application/atom+xml; type=feed"
           hash[:xml].should be_kind_of(Atom::Feed)
@@ -65,6 +66,7 @@ describe ControllerMixin, "#sdata_collection" do
         end
         @controller.sdata_collection
       end
+
     end
   end
 end

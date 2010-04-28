@@ -37,5 +37,12 @@ describe ControllerMixin, "#build_sdata_feed" do
     it "should adopt passed sdata_options" do
       @controller.build_sdata_feed.id = Base.sdata_options[:feed][:id]
     end
+    
+    it "should assign categories" do
+      @controller.build_sdata_feed.categories.size.should == 1
+      @controller.build_sdata_feed.categories[0].term.should == 'collection'
+      @controller.build_sdata_feed.categories[0].label.should == 'Resource Collection'
+      @controller.build_sdata_feed.categories[0].scheme.should == "http://schemas.sage.com/sdata/categories"
+    end
   end
 end

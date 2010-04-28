@@ -30,15 +30,25 @@ describe ActiveRecordMixin, "#to_atom" do
       end
 
       it "should assign Atom::Entry#updated" do
-        pending
+        @model.to_atom.updated.should < Time.now-1.day
+        @model.to_atom.updated.should > Time.now-1.day-1.minute        
       end
 
       it "should assign Atom::Entry#links" do
-        pending
+        @model.to_atom.links.size.should == 1
+        @model.to_atom.links[0].rel.should == 'self'
+        @model.to_atom.links[0].href.should == "http://www.example.com/sdata/example/myContract/-/bases('1')"
       end
 
       it "should assign Atom::Entry::id" do
-        pending
+        @model.to_atom.id.should == "http://www.example.com/sdata/example/myContract/-/bases('1')"
+      end
+
+      it "should assign Atom::Entry::categories" do
+        @model.to_atom.categories.size.should == 1
+        @model.to_atom.categories[0].term.should == "resource"
+        @model.to_atom.categories[0].label.should == "Resource"
+        @model.to_atom.categories[0].scheme.should == "http://schemas.sage.com/sdata/categories"
       end
 
 #      it "should expose activerecord attributes in a simple XML extension" do
