@@ -22,9 +22,10 @@ describe ActiveRecordMixin, "#to_atom" do
     def payload_header_assertions(xml)
       xml.children.size.should == 1
       xml.children[0].name.should == 'crmErp:customer'
-      xml.children[0].attributes.collect{|x|x[0]}.sort.should == ["sdata:key", "sdata:url"]
+      xml.children[0].attributes.collect{|x|x[0]}.sort.should == ["sdata:key", "sdata:url", "sdata:uuid"]
       xml.children[0].attributes["sdata:key"].value.should == "12345"
       xml.children[0].attributes["sdata:url"].value.should == "http://www.example.com/sdata/example/myContract/-/customers('12345')"
+      xml.children[0].attributes["sdata:uuid"].value.length.should > 0
     end
     describe "given the payload generating conditions" do
       before :each do 
@@ -239,7 +240,44 @@ describe ActiveRecordMixin, "#to_atom" do
           end
         end
       end
+
+      it "shows custom content and descriptor fields when requested" do
+        Customer.class_eval { acts_as_sdata(:content => :sdata_content) }
+        Contact.class_eval { acts_as_sdata(:content => :sdata_content) }
+        xml = Nokogiri::XML(@customer.to_atom(:include => "$descriptor,$children").payload.to_s)
+        xml.children.size.should == 1
+        xml.children[0].name.should == 'crmErp:customer'
+        xml.children[0].attributes.collect{|x|x[0]}.sort.should == ["sdata:descriptor", "sdata:key", "sdata:url", "sdata:uuid"]
+        xml.children[0].attributes["sdata:key"].value.should == "12345"
+        xml.children[0].attributes["sdata:url"].value.should == "http://www.example.com/sdata/example/myContract/-/customers('12345')"
+        xml.children[0].attributes["sdata:descriptor"].value.should == "Customer #12345: Customer Name"
+        xml.children[0].children.each do |element|
+          case element.name
+          when 'crmErp:myDefaultContact'
+            element.attributes.collect{|x|x[0]}.sort.should == ["sdata:descriptor", "sdata:key", "sdata:url", "sdata:uuid"]
+            element.attributes['sdata:descriptor'].value.should == "Contact #123: Contact Name"
+          when 'crmErp:myContacts'
+            element.children.each do |child_element|
+              child_element.attributes.collect{|x|x[0]}.sort.should == ["sdata:descriptor", "sdata:key", "sdata:url", "sdata:uuid"]
+              child_element.attributes['sdata:descriptor'].value.should =~ /Contact ##{child_element.attributes['sdata:key'].value}.*/
+            end
+          end
+        end
+      end
+
+      it "properly escapes xml content in user data" do
+        Customer.class_eval { acts_as_sdata(:content => :sdata_content) }
+        Contact.class_eval { acts_as_sdata(:content => :sdata_content) }
+        @customer.name = "</crmErp:name><div>asdf</div>"
+        @customer.number = "<div>123456</div>"
+        @customer.to_atom.payload.to_s.include?("</crmErp:name><div>asdf</div>").should == false
+        @customer.to_atom.payload.to_s.include?("<div>123456</div>").should == false
+        @customer.to_atom.payload.to_s.include?("&lt;/crmErp:name&gt;&lt;div&gt;asdf&lt;/div&gt;").should == true
+        @customer.to_atom.payload.to_s.include?("&lt;div&gt;123456&lt;/div&gt;").should == true
+      end  
       
+      #?include param (other than $children or $descriptors) is not properly implemented yet, and is not identified by Brian as first-priority request,
+      #so not writing tests for it yet.
     end
   end
 end

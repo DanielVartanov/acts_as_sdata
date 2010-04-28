@@ -78,18 +78,18 @@ module SData
         entity.to_s.demodulize.camelize(:lower)
       end
       
-      def descriptor(included)
-        return {} unless included.include?("$descriptor")
-        return "xlmns:sdata:descriptor" => self.entry_content
+      def resource_header_attributes(resource, included)
+        hash = {"xlmns:sdata:key" => resource.id, "xlmns:sdata:url" => resource.sdata_resource_url}
+        hash.merge!("xlmns:sdata:descriptor" => resource.entry_content) if included.include?("$descriptor")
+        hash.merge!("xlmns:sdata:uuid" => resource.uuid.to_s) if resource.respond_to?("uuid")
+        hash
       end
-      
-      #FIXME: REQUIRED: escape xml tags from user data (in the .to_s case)
 
       def payload(node_name, node_value, expand, included, element_precedence, maximum_precedence, resource_collection=nil)
         return "" if element_precedence > maximum_precedence
         builder = Builder::XmlMarkup.new
         if node_value.respond_to?('payload_map')
-          builder.__send__(node_value.xmlns_qualifier_for(node_name), {"xlmns:sdata:key" => node_value.id, "xlmns:sdata:url" => node_value.sdata_resource_url}.merge(node_value.descriptor(included))) do |element|           
+          builder.__send__(node_value.xmlns_qualifier_for(node_name), resource_header_attributes(node_value, included)) do |element|           
             if (expand != :none) || included.include?(node_name.to_s.camelize(:lower))
               node_value.payload_map.each_pair do |child_node_name, child_node_data|
                 expand = :none if (expand == :immediate_children) 

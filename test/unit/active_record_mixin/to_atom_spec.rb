@@ -40,13 +40,6 @@ describe ActiveRecordMixin, "#to_atom" do
       it "should assign Atom::Entry::id" do
         pending
       end
-      #FIXME: use xml parser instead of hash so we get proper namespace support
-      it "should populate payload from payload map" do
-        @model.stub! :payload_map => { :last_name => {:value => 'Washington'}, :first_name => {:value => "George"} }
-        atom_entry = @model.to_atom
-        hash = Hash.from_xml(atom_entry.to_xml)
-        hash['entry']['payload'].should == {"base"=>{"sdata:key"=>"1", "last_name"=>"Washington", "first_name"=>"George"}}
-      end
 
 #      it "should expose activerecord attributes in a simple XML extension" do
 #        @model.stub! :attributes => { :last_name => "Washington", :first_name => "George" }
