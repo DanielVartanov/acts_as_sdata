@@ -141,7 +141,7 @@ module SData
           end
 
           #['"name" eq ?', 'asdf'] ->['"name" eq ? and simply_guid is not null', 'asdf']
-          #[] -> "simply guid is not null"
+          #[] -> ["simply guid is not null"]
           if params.key? :condition
             options[:conditions] ||= []
             if params[:condition] == "linked" && sdata_options[:model].sdata_options[:link]

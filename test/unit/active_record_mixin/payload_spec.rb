@@ -54,7 +54,7 @@ describe ActiveRecordMixin, "#to_atom" do
             element.children[0].text.should == "simple_object_value"
           when 'crmErp:myContacts'
             element.keys.should == ['sdata:url']
-            element.attributes['sdata:url'].value.should == "http://www.example.com/sdata/example/myContract/-/contacts(customer_id eq '12345')"
+            element.attributes['sdata:url'].value.should == "http://www.example.com/sdata/example/myContract/-/customer('12345')/contacts"
             element.children.collect{|x|x.name}.sort.should == ["crmErp:myContact", "crmErp:myContact"]
             children = element.children.each do |child_element|
               case child_element.attributes['sdata:key'].value
@@ -155,7 +155,7 @@ describe ActiveRecordMixin, "#to_atom" do
             element.children[0].text.should == "simple_object_value"
           when 'crmErp:myContacts'
             element.keys.should == ['sdata:url']
-            element.attributes['sdata:url'].value.should == "http://www.example.com/sdata/example/myContract/-/contacts(customer_id eq '12345')"
+            element.attributes['sdata:url'].value.should == "http://www.example.com/sdata/example/myContract/-/customer('12345')/contacts"
             element.children.size.should == 0
           when 'crmErp:myDefaultContact'
             element.attributes["sdata:key"].value.should == "123"

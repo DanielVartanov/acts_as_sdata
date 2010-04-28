@@ -44,12 +44,12 @@ module SData
       def sdata_default_author
         "Billing Boss"
       end
-      def sdata_resource_url
+      def sdata_resource_url()
         $APPLICATION_URL + $SDATA_STORE_PATH + sdata_node_name.pluralize + "('#{self.id}')"
       end
 
-      def sdata_collection_url(collection_url)
-        $APPLICATION_URL + $SDATA_STORE_PATH + collection_url
+      def sdata_collection_url(parent, id, child)
+        $APPLICATION_URL + $SDATA_STORE_PATH + parent.camelize(:lower) + "('#{id}')/" + child
       end
 
       def entry_title
@@ -99,7 +99,7 @@ module SData
           end
         elsif node_value.is_a?(Array)
           if resource_collection
-            scoped_children_collection = self.sdata_collection_url("#{resource_collection[:url]}(#{resource_collection[:parent_key]} eq '#{self.id}')")
+            scoped_children_collection = sdata_collection_url(resource_collection[:parent], self.id, resource_collection[:url])
             builder.__send__(xmlns_qualifier_for(node_name), {"xlmns:sdata:url" => scoped_children_collection}) do |element|
               if (expand != :none) || included.include?(node_name.to_s.camelize(:lower))
                 expand = :none if (expand == :immediate_children) 

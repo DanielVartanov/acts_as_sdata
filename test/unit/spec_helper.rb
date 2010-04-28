@@ -13,7 +13,8 @@ include Webrat::Matchers
 
 setup_active_record
 
-$APPLICATION_URL = "http://www.example.com"
+$APPLICATION_HOST = "www.example.com"
+$APPLICATION_URL = "http://" + $APPLICATION_HOST
 $SDATA_STORE_PATH = "/sdata/example/myContract/-/"
 
 __DIR__ =File.dirname(__FILE__)

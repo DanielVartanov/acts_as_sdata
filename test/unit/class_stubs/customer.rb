@@ -33,7 +33,7 @@ class Customer < ModelBase
       :updated_at          => {:value => @updated_at, :precedence => 3},
       :my_default_contact  => {:value => self.default_contact, :precedence => 3},
       :my_contacts         => {:value => @contacts, :precedence => 5, :resource_collection => 
-                                {:url => 'contacts', :parent_key => 'customer_id'}
+                                {:url => 'contacts', :parent => 'customer'}
                               },
       :simple_elements   => {:value => ['element 1', 'element 2'], :precedence => 6},
       :hash     => {:value => {:simple_object_key => 'simple_object_value'}, :precedence => 6}
