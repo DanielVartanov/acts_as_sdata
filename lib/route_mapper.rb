@@ -17,7 +17,7 @@ module SData
     end
     
     def map_sdata_collection_with_condition
-      map_route "#{name_in_path}(\\$:condition)", 'sdata_collection', :get
+      map_route "#{name_in_path}\\$:condition", 'sdata_collection', :get
     end
     
     def map_sdata_collection_with_predicate
