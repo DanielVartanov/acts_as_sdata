@@ -1,6 +1,6 @@
 class User < ModelBase
   
-  attr_accessor :id, :name, :password, :created_at, :updated_at
+  attr_accessor :id, :name, :password, :customers, :created_at, :updated_at
   def populate_defaults
     self.id = @id || object_id.abs
     self.name = @name || "username"
