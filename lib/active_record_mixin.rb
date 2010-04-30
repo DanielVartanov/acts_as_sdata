@@ -21,21 +21,28 @@ module SData
         included = params[:include].to_s.split(',')
         expand = (included.include?('$children') ? :all : :immediate_children)
         returning Atom::Entry.new do |entry|
-          entry.id = self.sdata_resource_url
-          entry.title = entry_title
-          entry.updated = self.updated_at
-          entry.authors << Atom::Person.new(:name => self.respond_to?('author') ? self.author : sdata_default_author)
-          entry.links << Atom::Link.new(:rel => 'self', 
-                                        :href => self.sdata_resource_url, 
-                                        :type => 'applicaton/atom+xml; type=entry', 
-                                        :title => 'Refresh')
-          entry.categories << Atom::Category.new(:scheme => 'http://schemas.sage.com/sdata/categories',
-                                                 :term   => 'resource',
-                                                 :label  => 'Resource')
-          if maximum_precedence > 0
-            entry.payload = Atom::Content::Payload.new(self.payload(self.sdata_node_name, self, expand, included, 1, maximum_precedence))
+          begin
+            entry.id = self.sdata_resource_url
+            entry.title = entry_title
+            entry.updated = self.updated_at
+            entry.authors << Atom::Person.new(:name => self.respond_to?('author') ? self.author : sdata_default_author)
+            entry.links << Atom::Link.new(:rel => 'self', 
+                                          :href => self.sdata_resource_url, 
+                                          :type => 'applicaton/atom+xml; type=entry', 
+                                          :title => 'Refresh')
+            entry.categories << Atom::Category.new(:scheme => 'http://schemas.sage.com/sdata/categories',
+                                                   :term   => 'resource',
+                                                   :label  => 'Resource')
+            if maximum_precedence > 0
+              #raise 'entry-level error'
+              entry.payload = Atom::Content::Payload.new(self.payload(self.sdata_node_name, self, expand, included, 1, maximum_precedence))
+            end
+            entry.content = sdata_content
+          #example of ENTRY diagnosis. Currently can only have 1 per entry due to rAtom problems
+          #TODO: populate, at minimum, payload path for the failed entry, so consumer knows which entry flunked
+          rescue Exception => e 
+            entry.diagnosis = Atom::Content::Diagnosis.new(ApplicationDiagnosis.new(:exception => e).to_xml(false))
           end
-          entry.content = sdata_content
         end
       end
 

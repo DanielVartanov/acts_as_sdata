@@ -2,6 +2,7 @@
 module SData
   module AtomEntryMixin
     Atom::Entry.element :payload, :class => Atom::Content
+    Atom::Entry.element :diagnosis, :class => Atom::Content
     def self.included(base)
       base.send :attr_accessor
     end
