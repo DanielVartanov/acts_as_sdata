@@ -5,22 +5,19 @@ module SData
       self.sdata_options = options
 
       self.__send__ :include, InstanceMethods
+
     end
 
     module InstanceMethods
       module Actions
         def sdata_collection
           begin
-            #raise 'glboal error'
             errors = []
             collection = build_sdata_feed
             atom_entries = []
             sdata_scope.each do |entry|
               begin
-                #raise 'feed-level error'
-                entry.to_atom(params)
-                 #example of FEED errors, can be single or multiple
-                 #TODO: populate, at minimum, payload path for the failed entry, so consumer knows which entry flunked
+                collection.entries << entry.to_atom(params)
               rescue Exception => e
                 errors << ApplicationDiagnosis.new(:exception => e).to_xml(:feed)
               end
@@ -29,12 +26,9 @@ module SData
             errors.each do |error|
               collection[SData::Namespace::sdata_schemas['sdata'], 'diagnosis'] << error
             end
-            collection.entries += sdata_scope.map{|entry| entry.to_atom(params)}
             populate_open_search_for(collection)
             build_feed_links_for(collection)
             render :xml => collection, :content_type => "application/atom+xml; type=feed"
-          #example of ROOT errors, multiple are supported but can't think of a useful use case
-          #TODO: ensure that error handling of entry/feed levels which themselves raised errors are be caught here too
           rescue Exception => e 
             render :xml => ApplicationDiagnosis.new(:exception => e).to_xml(:root)
           end

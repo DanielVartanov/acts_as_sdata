@@ -12,6 +12,10 @@ class Customer < ModelBase
     self
   end
   
+  def contacts
+    @contacts || []
+  end
+  
   def default_contact
     self.contacts[0]
   end
