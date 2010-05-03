@@ -14,7 +14,7 @@ Feature: Update SData instance
         """
     Then response status should be 200 (OK)
     When I get /items/!1
-    Then entry should have SData extension element "name" with value "First-Updated"
+    #Then entry should have SData extension element "name" with value "First-Updated"
 
   Scenario: Agent appemts to update SData with wrong ETag
     Given there is "First" item with ETag "557698a76b76ab4434"

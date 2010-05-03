@@ -1,5 +1,10 @@
 # Be sure to restart your server when you modify this file
 
+$APPLICATION_HOST = "www.example.com"
+$APPLICATION_URL = "http://" + $APPLICATION_HOST
+$SDATA_HIERARCHY = ['example', 'crmErp', '-']
+$SDATA_STORE_PATH = "/sdata/#{$SDATA_HIERARCHY.join('/')}/"
+
 # Specifies gem version of Rails to use when vendor/rails is not present
 RAILS_GEM_VERSION = '2.3.5' unless defined? RAILS_GEM_VERSION
 

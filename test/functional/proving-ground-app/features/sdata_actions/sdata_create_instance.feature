@@ -10,7 +10,7 @@ Feature: Create SData instance
         """
     Then response should contain Atom entry
     And response status should be 201 (Created)
-    And entry should have SData extension element "id" with value "1"
+    And entry should have element "id" with value "http://www.example.com/sdata/example/crmErp/-/items('1')"
 
   Scenario: Agent fails to create a new instance
     When I post the following Atom entry to /items:
