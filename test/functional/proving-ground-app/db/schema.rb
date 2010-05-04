@@ -13,6 +13,7 @@ ActiveRecord::Schema.define(:version => 20100122124109) do
 
   create_table "items", :force => true do |t|
     t.string   "name"
+    t.string   "uuid"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

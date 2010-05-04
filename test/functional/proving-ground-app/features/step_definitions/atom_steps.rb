@@ -41,3 +41,11 @@ end
 Then /feed should contain element "(.+)" with value "(.+)"/ do |element_name, value|
   atom_feed.__send__(element_name.to_sym).should == value
 end
+
+Then /response should be a standalone "(.+)" diagnosis with status "(.+)"/ do |error_payload, http_status|
+  xml = parse_xml(body)
+  xml.root.name.should == 'diagnoses'
+  xml.root.children[0].name.should == 'diagnosis'
+  xml.root.children.detect{|child|child.name=='sdataCode'}.text.should == error_payload
+  status.to_s.should == http_status
+end

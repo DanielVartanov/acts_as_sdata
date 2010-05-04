@@ -8,12 +8,12 @@ When /I set the following headers:/ do |headers|
   end
 end
 
-When /I get ([\w\/!\(\)\s]+) with the following headers:$/ do |path, headers|
+When /I get ([\w\/!\(\)\s\'\$\/\-]+) with the following headers:$/ do |path, headers|
   When %{I set the following headers:}, headers
   request_page path, :get, {}
 end
 
-When /^I get ([\w\/!\(\)\s]+)$/ do |path|
+When /^I get ([\w\/!\(\)\s\'\$\/\-]+)$/ do |path|
   get path, nil
 end
 
