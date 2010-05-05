@@ -31,7 +31,8 @@ module SData
 
     # http://localhost:3000/sdata/billingboss/crmErp/-/tradingAccounts/$linked 
     def map_sdata_collection_with_condition
-      map_route "#{name_in_path}\/$linked", 'sdata_collection', :get
+      # map_route "#{name_in_path}\/$linked", 'sdata_collection', :get
+      map_route "#{name_in_path}\/{:condition,([$](linked))}", 'sdata_collection', :get
     end
     
     # http://localhost:3000/sdata/billingboss/crmErp/-/tradingAccounts(name eq 'asdf')   
