@@ -24,37 +24,32 @@ include SData
 describe ControllerMixin, "#sdata_collection" do
   describe "given sdata routes" do
     before :all do
-	TestController = Class.new
-	@router = Usher::Interface.for(:rails23)
-	@router.draw(:delimiters => ['/', '.', '!', '\(', '\)' ]) do |map|
-	    map.test '/test', :controller => 'test', :action => 'test_action'
-	  
-	    map.sdata_resource :items
-            map.sdata_resource :items, :prefix => '/sdata/example/crmErp/-/'
-	end
+      TestController = Class.new
+      @router = Usher::Interface.for(:rails23)
+      @router.draw(:delimiters => ['/', '.', '!', '\(', '\)' ]) do |map|
+        map.test '/test', :controller => 'test', :action => 'test_action'
+        
+        map.sdata_resource :items
+        map.sdata_resource :items, :prefix => '/sdata/example/crmErp/-/'
+      end
     end
 
-     it "recognizes dummy route" do        
-	request = mock_request('/test', :get,{})
-	@router.recognize(request).should == TestController
+    it "recognizes dummy route" do        
+      request = mock_request('/test', :get,{})
+      @router.recognize(request).should == TestController
     end
 
     it "recognizes basic route" do        
-	request = mock_request('/items', :get,{})
-	@router.recognize(request).should == ItemsController
-	request.path_parameters.should == {"controller"=>"items", "action"=>"sdata_collection"}
+      request = mock_request('/items', :get,{})
+      @router.recognize(request).should == ItemsController
+      request.path_parameters.should == {"controller"=>"items", "action"=>"sdata_collection"}
     end
 
     it "recognizes route with prefix" do        
-       request = mock_request('/sdata/example/crmErp/-/items', :get,{})
-       @router.recognize(request).should == ItemsController
-	request.path_parameters.should == {"controller"=>"items", "action"=>"sdata_collection"}
+      request = mock_request('/sdata/example/crmErp/-/items', :get,{})
+      @router.recognize(request)
+      request.path_parameters.should == {"controller"=>"items", "action"=>"sdata_collection"}
     end
 
-    it "recognizes route with prefix" do        
-       request = mock_request('/sdata/example/crmErp/-/items', :get,{})
-       @router.recognize(request).should == ItemsController
-	request.path_parameters.should == {"controller"=>"items", "action"=>"sdata_collection"}
-    end
   end
 end
