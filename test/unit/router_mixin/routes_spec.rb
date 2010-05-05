@@ -4,17 +4,8 @@ require 'rubygems'
 require "usher"
 require "usher/interface/rails23"
 
-require 'ruby-debug'
-
-# we want no ActionView helpers
-class Usher
-  module Interface
-    class Rails23
-	def install_helpers
-	end
-    end
-  end
-end
+#Usher::Interface::Rails23.stub!(:install_helpers) # we want no ActionView helpers
+Usher::Interface::Rails23.class_eval { def install_helpers; end }
 
 def mock_request(path, method, params)
   request = mock "Request"
@@ -26,55 +17,44 @@ def mock_request(path, method, params)
   request
 end
 
-
-TestController = Class.new
 ItemsController = Class.new
 
 include SData
 
 describe ControllerMixin, "#sdata_collection" do
-  describe "given an usher router" do
+  describe "given sdata routes" do
     before :all do
-	    
-	#ActionController::Routing.module_eval "remove_const(:Routes); Routes = Usher::Interface.for(:rails23)"
+	TestController = Class.new
 	@router = Usher::Interface.for(:rails23)
-	#@router = ActionController::Routing::Routes
-
-	#require "usher"
-	#@router = Usher.new :delimiters => ['/', '.', '!', '\(', '\)' ]
+	@router.draw(:delimiters => ['/', '.', '!', '\(', '\)' ]) do |map|
+	    map.test '/test', :controller => 'test', :action => 'test_action'
+	  
+	    map.sdata_resource :items
+            map.sdata_resource :items, :prefix => '/sdata/example/crmErp/-/'
+	end
     end
 
-
-     it "should something" do        
-
-      	#target_route = @route_set.add_route('/sample', :controller => 'sample', :action => 'action', :conditions => {:protocol => 'http'}).unrecognizable!
-      	#@route_set.recognize(build_request({:method => 'get', :path => '/sample', :protocol => 'http'})).should be_nil
-
-	@router.draw(:delimiters => ['/', '.', '!', '\(', '\)' ]) do |map|
-	  map.test '/test', :controller => 'test', :action => 'test_action'
-	  #map.test '/items', :controller => 'items', :action => 'test_action'
-
-	  map.sdata_resource :items
-	  #map.sdata_resource :items, :prefix => '/sdata/example/crmErp/-/'
-	end
-	
+     it "recognizes dummy route" do        
 	request = mock_request('/test', :get,{})
 	@router.recognize(request).should == TestController
+    end
 
+    it "recognizes basic route" do        
 	request = mock_request('/items', :get,{})
 	@router.recognize(request).should == ItemsController
-	
+	request.path_parameters.should == {"controller"=>"items", "action"=>"sdata_collection"}
+    end
 
-	#@router.recognize request('/test', 'get', { }#:controller => 'items', :action => 'collection'})
-      
-        #@controller.should_receive(:render) do |hash|
-        #  hash[:content_type].should == "application/atom+xml; type=feed"
-        #  hash[:xml].should be_kind_of(Atom::Feed)
-        #  hash[:xml].entries.should == Model.all.map{|entry| entry.to_atom({})}
-        #end
-        #@controller.sdata_collection
-      #end
+    it "recognizes route with prefix" do        
+       request = mock_request('/sdata/example/crmErp/-/items', :get,{})
+       @router.recognize(request).should == ItemsController
+	request.path_parameters.should == {"controller"=>"items", "action"=>"sdata_collection"}
+    end
 
+    it "recognizes route with prefix" do        
+       request = mock_request('/sdata/example/crmErp/-/items', :get,{})
+       @router.recognize(request).should == ItemsController
+	request.path_parameters.should == {"controller"=>"items", "action"=>"sdata_collection"}
     end
   end
 end
