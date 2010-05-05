@@ -51,5 +51,23 @@ describe ControllerMixin, "#sdata_collection" do
       request.path_parameters.should == {"controller"=>"items", "action"=>"sdata_collection"}
     end
 
+    it "recognizes route with predicate" do        
+      request = mock_request("/items(id gt 1)", :get, {})
+      @router.recognize(request)
+      request.path_parameters.should == {"controller"=>"items", "action"=>"sdata_collection", "predicate"=>"id gt 1"}
+    end
+
+    it "recognizes route with linked collection" do        
+      request = mock_request("/items/$linked", :get, {})
+      @router.recognize(request)
+      request.path_parameters.should == {"controller"=>"items", "action"=>"sdata_collection", "condition"=>"$linked" }
+    end
+
+    it "recognizes route with linked collection and predicate" do        
+      request = mock_request("/items/$linked(name eq 'Second')", :get, {})
+      @router.recognize(request)
+      request.path_parameters.should == {"controller"=>"items", "action"=>"sdata_collection", "condition"=>"$linked", "predicate"=>"name eq 'Second'"}
+    end
+
   end
 end
