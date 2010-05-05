@@ -139,26 +139,28 @@ module SData
       #TODO: rescue_action_in_public won't work for some reason here. When merging with real Billing Boss app,
       #investigate. Need to preserve stack traces for dev env for non-simply requests.
       def sdata_global_rescue(exception, request_path)
-        case exception.class.to_s
+        error_payload = case exception.class.to_s
         when "NoMethodError"
-          if request_path.match /^\/sdata\/#{$SDATA_HIERARCHY[0]}\/#{$SDATA_HIERARCHY[1]}\/#{$SDATA_HIERARCHY[2]}.+/ 
-            error_payload = SData::ResourceKindNotFound.new(:exception => exception, :http_status_code => '404')
+          if request_path.match /^\/sdata\/#{$SDATA_HIERARCHY[0]}\/#{$SDATA_HIERARCHY[1]}\/#{$SDATA_HIERARCHY[2]}\/[A-z]+\/.*/ 
+            SData::ApplicationDiagnosis.new(:exception => exception, :http_status_code => '500')          
+          elsif request_path.match /^\/sdata\/#{$SDATA_HIERARCHY[0]}\/#{$SDATA_HIERARCHY[1]}\/#{$SDATA_HIERARCHY[2]}\/[A-z]+/ 
+            SData::ResourceKindNotFound.new(:exception => exception, :http_status_code => '404')
           elsif request_path.match /^\/sdata\/#{$SDATA_HIERARCHY[0]}\/#{$SDATA_HIERARCHY[1]}\/#{$SDATA_HIERARCHY[2]}$/
-            error_payload = SData::ApplicationDiagnosis.new(:exception => exception, :http_status_code => '501')
+            SData::ApplicationDiagnosis.new(:exception => exception, :http_status_code => '501')
           elsif request_path.match /^\/sdata\/#{$SDATA_HIERARCHY[0]}\/#{$SDATA_HIERARCHY[1]}.+/
-            error_payload = SData::ContractNotFound.new(:exception => exception, :http_status_code => '404')
+            SData::ContractNotFound.new(:exception => exception, :http_status_code => '404')
           elsif request_path.match /^\/sdata\/#{$SDATA_HIERARCHY[0]}\/#{$SDATA_HIERARCHY[1]}$/
-            error_payload = SData::ApplicationDiagnosis.new(:exception => exception, :http_status_code => '501')
+            SData::ApplicationDiagnosis.new(:exception => exception, :http_status_code => '501')
           elsif request_path.match /^\/sdata\/#{$SDATA_HIERARCHY[0]}.+/  
-            error_payload = SData::DatasetNotFound.new(:exception => exception, :http_status_code => '404')
+            SData::DatasetNotFound.new(:exception => exception, :http_status_code => '404')
           elsif request_path.match /^\/sdata\/#{$SDATA_HIERARCHY[0]}$/  
-            error_payload = SData::ApplicationDiagnosis.new(:exception => exception, :http_status_code => '501')
+            SData::ApplicationDiagnosis.new(:exception => exception, :http_status_code => '501')
           else
-            error_payload = SData::ApplicationNotFound.new(:exception => exception, :http_status_code => '404')
+            SData::ApplicationNotFound.new(:exception => exception, :http_status_code => '404')
           end
         #TODO: customize further as needed
         else
-          error_payload = SData::ApplicationDiagnosis.new(:exception => exception, :http_status_code => '500')
+          SData::ApplicationDiagnosis.new(:exception => exception, :http_status_code => '500')
         end
         render :xml => error_payload.to_xml(:root), :status => (error_payload.send('http_status_code') || '500')
       end

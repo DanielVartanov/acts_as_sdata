@@ -32,7 +32,7 @@ describe ControllerMixin, "#sdata_show_instance" do
           entry = Atom::Entry.new
           @record.should_receive(:to_atom).and_return(entry)
           @controller.should_receive(:render).with(:xml => entry, :content_type => "application/atom+xml; type=entry")
-
+  
           @controller.sdata_show_instance
         end
       end

@@ -35,7 +35,7 @@ module SData
         end
 
         def sdata_show_instance
-          instance = model_class.find_by_sdata_instance_id(params[:instance_id])
+          instance = model_class.find_by_sdata_instance_id(Predicate.strip_quotes(params[:instance_id]))
           render :xml => instance.to_atom(params), :content_type => "application/atom+xml; type=entry"
         end
 
@@ -49,7 +49,7 @@ module SData
         end
 
         def sdata_update_instance
-          instance = model_class.find_by_sdata_instance_id(params[:instance_id])
+          instance = model_class.find_by_sdata_instance_id(Predicate.strip_quotes(params[:instance_id]))
           response.etag = [instance]
           if request.fresh?(response)
             if instance.update_attributes(params[:entry].to_attributes)
@@ -171,7 +171,7 @@ module SData
         
           if params.key? :condition
             options[:conditions] ||= []
-            if params[:condition] == "linked" && sdata_options[:model].sdata_options[:link]
+            if params[:condition] == "$linked" && sdata_options[:model].sdata_options[:link]
               condition = "#{sdata_options[:model].sdata_options[:link]} is not null"
               options[:conditions][0] = [options[:conditions].to_a[0], condition].compact.join(' and ')
             end

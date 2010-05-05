@@ -32,6 +32,21 @@ Feature: Get SData collection
     Then response body should contain Atom Feed
     And feed should contain 1 entries
 
+  Scenario: Agent gets SData collection with empty string predicate
+    When I get /items(name eq '')
+    Then response body should contain Atom Feed
+    And feed should contain 0 entries
+
+  Scenario: Agent gets SData empty linked collection
+    When I get /items/$linked
+    Then response body should contain Atom Feed
+    And feed should contain 0 entries
+
+  Scenario: Agent gets SData empty linked collection with predicate
+    When I get /items/$linked(name eq 'Second')
+    Then response body should contain Atom Feed
+    And feed should contain 0 entries
+
   Scenario: Agent gets SData linked collection
     Given there is an item with the following properties:
         | Name | Fourth                               |

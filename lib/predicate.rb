@@ -7,6 +7,8 @@ module SData
     end
 
     def self.strip_quotes(value)
+     return value unless value.is_a?(String)
+     value = value.gsub("%27", "'")
      return value unless value =~ /'.*?'/
      return value[1,value.length-2]
     end

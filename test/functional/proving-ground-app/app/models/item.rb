@@ -10,5 +10,8 @@ class Item < ActiveRecord::Base
     "Item ##{self.id}: #{self.name}"
   end
 
+  def uuid
+    nil
+  end
                 
 end

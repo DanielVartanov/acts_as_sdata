@@ -79,7 +79,7 @@ describe ControllerMixin, "#sdata_scope" do
       
       describe "when params contain :condition key and :predicate key" do
         before :each do
-          @controller.stub! :params => { :predicate => 'born_at gt 1900', :condition => 'linked' }
+          @controller.stub! :params => { :predicate => 'born_at gt 1900', :condition => '$linked' }
         end
   
         it "should apply to SData::Predicate for conditions and append requirement for simply guid" do
@@ -90,7 +90,7 @@ describe ControllerMixin, "#sdata_scope" do
   
       describe "when params contain :condition key but do not contain :predicate key" do
         before :each do
-          @controller.stub! :params => {:condition => 'linked'}
+          @controller.stub! :params => {:condition => '$linked'}
         end
   
         it "should return all entity records with simply guid" do
@@ -128,7 +128,7 @@ describe ControllerMixin, "#sdata_scope" do
       end
       describe "with condition and predicate" do
         before :each do
-          @controller.stub! :params => { :predicate => 'born_at gt 1900', :condition => 'linked' }
+          @controller.stub! :params => { :predicate => 'born_at gt 1900', :condition => '$linked' }
           @controller.stub! :current_user => @user
         end  
         it "should return all entity records with created_by, predicate, and link scope" do
