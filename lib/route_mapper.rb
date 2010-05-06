@@ -32,21 +32,21 @@ module SData
     # http://localhost:3000/sdata/billingboss/crmErp/-/tradingAccounts/$linked 
     def map_sdata_collection_with_condition
       # map_route "#{name_in_path}\/$linked", 'sdata_collection', :get
-      map_route "#{name_in_path}\/{:condition,([$](linked))}", 'sdata_collection', :get
+      map_route "#{name_in_path}\/#{CONDITION}", 'sdata_collection', :get
     end
     
     # http://localhost:3000/sdata/billingboss/crmErp/-/tradingAccounts(name eq 'asdf')   
     # http://localhost:3000/sdata/billingboss/crmErp/-/tradingAccounts(name eq asdf)  
     # http://localhost:3000/sdata/billingboss/crmErp/-/tradingAccounts(name eq '')   
     def map_sdata_collection_with_predicate
-      map_route "#{name_in_path}\\({:predicate,[A-z]+(%20|\s)[A-z]+(%20|\s)(%27|')?[^']*(%27|')?}\\)", 'sdata_collection', :get
+      map_route "#{name_in_path}\\(#{PREDICATE}\\)", 'sdata_collection', :get
     end
 
     # http://localhost:3000/sdata/billingboss/crmErp/-/tradingAccounts/$linked(name eq 'asdf')   
     # http://localhost:3000/sdata/billingboss/crmErp/-/tradingAccounts/$linked(name eq asdf)  
     # http://localhost:3000/sdata/billingboss/crmErp/-/tradingAccounts/$linked(name eq '')   
     def map_sdata_collection_with_condition_and_predicate
-      map_route "#{name_in_path}\/{:condition,([$](linked))}\\({:predicate,[A-z]+(%20|\s)[A-z]+(%20|\s)(%27|')?[^']*(%27|')?}\\)", 'sdata_collection', :get
+      map_route "#{name_in_path}\/#{CONDITION}\\(#{PREDICATE}\\)", 'sdata_collection', :get
     end
 
     # http://localhost:3000/sdata/billingboss/crmErp/-/tradingAccounts('1')    
@@ -56,7 +56,7 @@ module SData
 
     # http://localhost:3000/sdata/billingboss/crmErp/-/tradingAccounts/$linked('1')    
     def map_sdata_show_instance_with_condition
-      map_route "#{name_in_path}/$linked\\(:instance_id\\)", 'sdata_show_instance', :get
+      map_route "#{name_in_path}/#{CONDITION}\\(:instance_id\\)", 'sdata_show_instance', :get
     end
 
     # http://localhost:3000/sdata/billingboss/crmErp/-/tradingAccounts
@@ -79,9 +79,6 @@ module SData
       @controller_with_namespace ||= "#{namespace}#{controller}"
     end
 
-    #was: @namespace ||= ("#{options[:namespace]}/" || "")
-    #but if options[:namespace] is nil, then "#{nil}/" == "/" == !false,
-    #so it'd return "/" instead of "" as required
     def namespace
       @namespace ||= (options[:namespace] ? "#{options[:namespace]}/" : "")
     end
@@ -105,5 +102,16 @@ module SData
     def prefix?
       !! prefix
     end
+    
+    def urlize(str)
+      RouteMapper.urlize(str)
+    end
+    
+    def self.urlize(string)
+      string.gsub("'", "(%27|')").gsub("\s", "(%20|\s)")
+    end
+    
+    CONDITION = urlize("{:condition,([$](linked))}")
+    PREDICATE = urlize("{:predicate,[A-z]+\s[A-z]+\s'?[^']*'?}")
   end
 end

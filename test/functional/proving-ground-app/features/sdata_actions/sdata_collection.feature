@@ -50,7 +50,7 @@ Feature: Get SData collection
   Scenario: Agent gets SData linked collection
     Given there is an item with the following properties:
         | Name | Fourth                               |
-        | UUID | 88815929-A503-4fcb-B5CC-F1BB8ECFC874 |
+        | uuid | 88815929-A503-4fcb-B5CC-F1BB8ECFC874 |
     When I get /items/$linked
     Then response body should contain Atom Feed
     And feed should contain 1 entries
