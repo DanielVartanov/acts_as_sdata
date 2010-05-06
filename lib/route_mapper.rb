@@ -13,7 +13,14 @@ module SData
       map_sdata_update_instance
     end
 
+    def self.urlize(string)
+      string.gsub("'", "(%27|')").gsub("\s", "(%20|\s)")
+    end
+
     protected
+    
+    CONDITION = urlize("{:condition,([$](linked))}")
+    PREDICATE = urlize("{:predicate,[A-z]+\s[A-z]+\s'?[^']*'?}")
 
     # http://localhost:3000/sdata/billingboss/crmErp/-/tradingAccounts
     def map_sdata_collection
@@ -102,16 +109,6 @@ module SData
     def prefix?
       !! prefix
     end
-    
-    def urlize(str)
-      RouteMapper.urlize(str)
-    end
-    
-    def self.urlize(string)
-      string.gsub("'", "(%27|')").gsub("\s", "(%20|\s)")
-    end
-    
-    CONDITION = urlize("{:condition,([$](linked))}")
-    PREDICATE = urlize("{:predicate,[A-z]+\s[A-z]+\s'?[^']*'?}")
+
   end
 end
