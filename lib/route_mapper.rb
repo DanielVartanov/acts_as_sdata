@@ -1,8 +1,8 @@
 module SData
   class RouteMapper < Struct.new(:router, :resource_name, :options)
     def map_sdata_routes!
+      #RADAR: the order of the below statements makes a difference
       map_sdata_collection
-
       map_sdata_collection_with_condition_and_predicate
       map_sdata_collection_with_predicate
       map_sdata_collection_with_condition
@@ -26,19 +26,9 @@ module SData
     def map_sdata_collection
       map_route "#{name_in_path}", 'sdata_collection', :get
     end
-    
-    #    FIXME: Should be abstracted to:
-    # map_route "#{name_in_path}\/{:condition,([$](linked))}", 'sdata_collection', :get
-    # because we will need to support other variables than $linked. However, this conflicts with the route 
-    # mapping at map_sdata_collection_with_predicate_and_condition. If both methods are abstracted, one of them
-    # won't work (the one that won't work depends on which one was mapped first).
-    #    Furthermore, map_sdata_collection_with_predicate_and_condition method's route causes THIS method's
-    # route to magically assign :conditions => '$linked' in params (doesn't happen if $linked is replaced with 
-    # $anything_else in this method. This is very strange and can be a blocker to supporting further variables.
 
     # http://localhost:3000/sdata/billingboss/crmErp/-/tradingAccounts/$linked 
     def map_sdata_collection_with_condition
-      # map_route "#{name_in_path}\/$linked", 'sdata_collection', :get
       map_route "#{name_in_path}\/#{CONDITION}", 'sdata_collection', :get
     end
     

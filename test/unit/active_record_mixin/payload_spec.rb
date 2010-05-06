@@ -257,10 +257,21 @@ describe ActiveRecordMixin, "#to_atom" do
             element.attributes.collect{|x|x[0]}.sort.should == ["sdata:descriptor", "sdata:key", "sdata:url", "sdata:uuid"]
             element.attributes['sdata:descriptor'].value.should == "Contact #123: Contact Name"
           when 'crmErp:myContacts'
+            found_with_uuid, found_without_uuid = false
+            element.children.size.should == 2
             element.children.each do |child_element|
-              child_element.attributes.collect{|x|x[0]}.sort.should == ["sdata:descriptor", "sdata:key", "sdata:url", "sdata:uuid"]
+              if child_element.attributes['sdata:uuid']
+                found_with_uuid = true
+                child_element.attributes.collect{|x|x[0]}.sort.should == ["sdata:descriptor", "sdata:key", "sdata:url", "sdata:uuid"]
+                child_element.attributes['sdata:uuid'].value.should == "C-123-456"
+              else
+                found_without_uuid = true
+                child_element.attributes.collect{|x|x[0]}.sort.should == ["sdata:descriptor", "sdata:key", "sdata:url"]
+              end
               child_element.attributes['sdata:descriptor'].value.should =~ /Contact ##{child_element.attributes['sdata:key'].value}.*/
             end
+            found_with_uuid.should == true
+            found_without_uuid.should == true
           end
         end
       end

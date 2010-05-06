@@ -89,7 +89,7 @@ module SData
       def resource_header_attributes(resource, included)
         hash = {"xlmns:sdata:key" => resource.id, "xlmns:sdata:url" => resource.sdata_resource_url}
         hash.merge!("xlmns:sdata:descriptor" => resource.entry_content) if included.include?("$descriptor")
-        hash.merge!("xlmns:sdata:uuid" => resource.uuid.to_s) if resource.respond_to?("uuid")
+        hash.merge!("xlmns:sdata:uuid" => resource.uuid.to_s) if resource.respond_to?("uuid") && !resource.uuid.blank?
         hash
       end
 
