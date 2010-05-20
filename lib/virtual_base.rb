@@ -5,9 +5,10 @@ require 'forwardable'
 
 class VirtualBase
   extend Forwardable
+  cattr_accessor :baze_class
   attr_accessor :baze
   def_delegators :baze, :id, :created_at, :updated_at, :save, :update_attributes
-  
+
   def initialize(the_baze, the_type=nil)
     self.baze = the_baze
 

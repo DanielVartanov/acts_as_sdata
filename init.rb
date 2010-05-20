@@ -15,5 +15,5 @@ $SDATA_SCHEMAS = {
                  }
 
 dir = File.dirname(__FILE__)
-files = %w[ active_record_mixin atom_content_mixin atom_entry_mixin conditions_builder controller_mixin diagnosis namespace_definitions payload predicate route_mapper router_mixin virtual_base payload_map ]
+files = %w[ active_record_mixin atom_content_mixin atom_entry_mixin conditions_builder controller_mixin diagnosis namespace_definitions payload predicate route_mapper router_mixin virtual_base payload_map payload_map_hash]
 files.each {|file| require File.join(dir, 'lib', file) }
