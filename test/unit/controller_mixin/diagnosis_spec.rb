@@ -8,7 +8,7 @@ describe ControllerMixin, "#sdata_collection" do
       Customer.extend ActiveRecordMixin
       Customer.class_eval { acts_as_sdata }
       class EntryDiagnosisCustomer < Customer
-        def payload(*params)
+        def resource_header_attributes(*params)
           raise 'Exception while trying to construct payload map'
         end
       end

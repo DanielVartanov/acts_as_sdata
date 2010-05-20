@@ -53,7 +53,7 @@ module SData
         value = self.send(attribute) unless [:http_status_code].include?(attribute)
         if value
           if value.is_a?(Exception)
-            node << (XML::Node.new("sdata:stackTrace") << value.backtrace) if !['production', 'staging'].include?(ENV['RAILS_ENV'])
+            node << (XML::Node.new("sdata:stackTrace") << value.backtrace.join("\n") ) if !['production', 'staging'].include?(ENV['RAILS_ENV'])
           else
             node << (XML::Node.new("sdata:#{attribute.to_s.camelize(:lower)}") << value)
           end
@@ -139,8 +139,8 @@ module SData
       #TODO: rescue_action_in_public won't work for some reason here. When merging with real Billing Boss app,
       #investigate. Need to preserve stack traces for dev env for non-simply requests.
       def sdata_global_rescue(exception, request_path)
-        error_payload = case exception.class.to_s
-        when "NoMethodError"
+        error_payload = case exception.class.to_s.demodulize
+        when 'NoMethodError'
           if request_path.match /^\/sdata\/#{$SDATA_HIERARCHY[0]}\/#{$SDATA_HIERARCHY[1]}\/#{$SDATA_HIERARCHY[2]}\/[A-z]+\/.*/ 
             SData::ApplicationDiagnosis.new(:exception => exception, :http_status_code => '500')          
           elsif request_path.match /^\/sdata\/#{$SDATA_HIERARCHY[0]}\/#{$SDATA_HIERARCHY[1]}\/#{$SDATA_HIERARCHY[2]}\/[A-z]+/ 
@@ -158,7 +158,8 @@ module SData
           else
             SData::ApplicationNotFound.new(:exception => exception, :http_status_code => '404')
           end
-        #TODO: customize further as needed
+        when 'AccessDeniedException'
+	        SData::ApplicationDiagnosis.new(:exception => exception, :http_status_code => '403')
         else
           SData::ApplicationDiagnosis.new(:exception => exception, :http_status_code => '500')
         end

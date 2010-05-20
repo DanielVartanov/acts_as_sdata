@@ -5,14 +5,14 @@ include SData
 describe ActiveRecordMixin, "#to_atom" do
   describe "given a class extended by ActiveRecordExtentions" do
     before :all do
-      [User, Customer, Contact].each do |model|
+      [User, Customer, Contact, Address].each do |model|
         model.extend ActiveRecordMixin
         model.class_eval { acts_as_sdata }
       end
     end
 
     def customer_attributes
-      ["crmErp:createdAt", "crmErp:hash", "crmErp:myContacts", "crmErp:myDefaultContact", "crmErp:name", "crmErp:number", "crmErp:simpleElements", "crmErp:updatedAt", "crmErp:uuid"]
+      ["crmErp:address", "crmErp:associatedContacts", "crmErp:createdAt", "crmErp:hash", "crmErp:myContacts", "crmErp:myDefaultContact", "crmErp:name", "crmErp:number", "crmErp:simpleElements", "crmErp:updatedAt", "crmErp:uuid"]
     end
 
     def contact_attributes
@@ -37,14 +37,18 @@ describe ActiveRecordMixin, "#to_atom" do
         @customer.contacts[1].name = "Second Contact Name"
         @customer.contacts.each do |contact|
           contact.populate_defaults
-        end        
+        end
+        @customer.address.populate_defaults
       end
-      it "describes elements with recursively included children" do
+      it "describes elements with recursively included children without including associations" do
         xml = Nokogiri::XML(@customer.to_atom(:include => '$children').payload.to_s)
         payload_header_assertions(xml)
         xml.children[0].children.collect{|x|x.name}.sort.should == customer_attributes
         xml.children[0].children.each do |element|
           case element.name
+          when 'crmErp:associatedContacts'
+            element.children.size.should == 0
+            element.keys.should == ["sdata:url"]
           when 'crmErp:simpleElements'
             element.children.collect{|x|x.name}.sort.should == ["crmErp:simpleElement", "crmErp:simpleElement"]
             [element.children[0].text, element.children[1].text].sort.should == ["element 1", "element 2"]
@@ -55,7 +59,7 @@ describe ActiveRecordMixin, "#to_atom" do
           when 'crmErp:myContacts'
             element.keys.should == ['sdata:url']
             element.attributes['sdata:url'].value.should == "http://www.example.com/sdata/example/myContract/-/customer('12345')/contacts"
-            element.children.collect{|x|x.name}.sort.should == ["crmErp:myContact", "crmErp:myContact"]
+            element.children.collect{|x|x.name}.sort.should == ["crmErp:contact", "crmErp:contact"]
             children = element.children.each do |child_element|
               case child_element.attributes['sdata:key'].value
               when '123'
@@ -124,6 +128,23 @@ describe ActiveRecordMixin, "#to_atom" do
                 raise "Unknown contact element: #{child_element.name}"
               end
             end
+          when 'crmErp:address'
+            element.attributes["sdata:key"].value.should == "12345"
+            element.attributes["sdata:url"].value.should == "http://www.example.com/sdata/example/myContract/-/addresses('12345')"
+            element.children.each do |child_element|
+              case child_element.name
+              when "crmErp:createdAt"
+                Time.parse(child_element.text).should < Time.now-2.days                
+              when "crmErp:customerId"
+                child_element.attributes["xsi:nil"].value.should == 'true'               
+              when "crmErp:updatedAt"
+                Time.parse(child_element.text).should < Time.now-1.day   
+              when "crmErp:city"
+                child_element.text.should == 'Vancouver'
+              else
+                raise "Unknown address element: #{child_element.name}"
+              end
+            end
           when 'crmErp:name'
             element.text.should == "Customer Name"
           when 'crmErp:number'
@@ -135,7 +156,7 @@ describe ActiveRecordMixin, "#to_atom" do
           when "crmErp:updatedAt"
              Time.parse(element.text).should < Time.now-1.days 
           else
-            raise "Unknown customer element: #{element.name}"
+            raise "Unexpected customer element: #{element.name}"
           end
         end
       end
@@ -146,6 +167,8 @@ describe ActiveRecordMixin, "#to_atom" do
         xml.children[0].children.collect{|x|x.name}.sort.should == customer_attributes      
         xml.children[0].children.each do |element|
           case element.name
+          when 'crmErp:associatedContacts'
+            element.children.size.should == 0
           when 'crmErp:simpleElements'
             element.children.collect{|x|x.name}.sort.should == ["crmErp:simpleElement", "crmErp:simpleElement"]
             [element.children[0].text, element.children[1].text].sort.should == ["element 1", "element 2"]
@@ -171,8 +194,25 @@ describe ActiveRecordMixin, "#to_atom" do
              Time.parse(element.text).should < Time.now-1.days 
           when 'crmErp:uuid'
             element.text.should == "CUST-123456-654321-000000"
+          when 'crmErp:address'
+            element.attributes["sdata:key"].value.should == "12345"
+            element.attributes["sdata:url"].value.should == "http://www.example.com/sdata/example/myContract/-/addresses('12345')"
+            element.children.each do |child_element|
+              case child_element.name
+              when "crmErp:createdAt"
+                Time.parse(child_element.text).should < Time.now-2.days                
+              when "crmErp:customerId"
+                child_element.attributes["xsi:nil"].value.should == 'true'               
+              when "crmErp:updatedAt"
+                Time.parse(child_element.text).should < Time.now-1.day   
+              when "crmErp:city"
+                child_element.text.should == 'Vancouver'
+              else
+                raise "Unknown address element: #{child_element.name}"
+              end
+            end
           else
-            raise "Unknown customer element: #{element.name}"
+            raise "Unexpected customer element: #{element.name}"
           end
         end
       end
@@ -199,7 +239,7 @@ describe ActiveRecordMixin, "#to_atom" do
           when 'crmErp:uuid'
             element.text.should == "CUST-123456-654321-000000"
           else
-            raise "Unknown customer element: #{element.name}"
+            raise "Unexpected customer element: #{element.name}"
           end
         end
       end
@@ -207,9 +247,11 @@ describe ActiveRecordMixin, "#to_atom" do
      it "applies precendence filter to child attributes as well" do
         xml = Nokogiri::XML(@customer.to_atom(:include => "$children", :precedence => 3).payload.to_s)
         payload_header_assertions(xml)
-        xml.children[0].children.collect{|x|x.name}.sort.should == ["crmErp:createdAt", "crmErp:myDefaultContact", "crmErp:name", "crmErp:updatedAt", "crmErp:uuid"]
+        xml.children[0].children.collect{|x|x.name}.sort.should == ["crmErp:associatedContacts", "crmErp:createdAt", "crmErp:myDefaultContact", "crmErp:name", "crmErp:updatedAt", "crmErp:uuid"]
         xml.children[0].children.each do |element|
           case element.name
+          when 'crmErp:associatedContacts'
+            element.children.size.should == 0
           when 'crmErp:name'
             element.text.should == "Customer Name"
           when "crmErp:createdAt"
@@ -236,7 +278,7 @@ describe ActiveRecordMixin, "#to_atom" do
               end
             end            
           else
-            raise "Unknown customer element: #{element.name}"
+            raise "Unexpected customer element: #{element.name}"
           end
         end
       end
@@ -275,7 +317,218 @@ describe ActiveRecordMixin, "#to_atom" do
           end
         end
       end
-
+      
+      it "includes associations on simple include request for that association when in non sync mode" do
+        Payload.stub :is_sync? => false
+        xml = Nokogiri::XML(@customer.to_atom(:include => 'associatedContacts').payload.to_s)
+        payload_header_assertions(xml)
+        xml.children[0].children.collect{|x|x.name}.sort.should == customer_attributes      
+        xml.children[0].children.each do |element|
+          case element.name
+          when 'crmErp:associatedContacts'
+            element.keys.should == ['sdata:url']
+            element.attributes['sdata:url'].value.should == "http://www.example.com/sdata/example/myContract/-/customer('12345')/contacts"
+            element.children.size.should == 2
+            element.children.collect{|x|x.name}.sort.should == ["crmErp:contact", "crmErp:contact"]
+            children = element.children.each do |child_element|
+              case child_element.attributes['sdata:key'].value
+              when '123'
+                child_element.attributes['sdata:url'].value.should == "http://www.example.com/sdata/example/myContract/-/contacts('123')"
+                child_element.children.collect{|x|x.name}.sort.should == contact_attributes
+                child_element.children.each do |grandchild_element|
+                case grandchild_element.name
+                  when "crmErp:createdAt"
+                    Time.parse(grandchild_element.text).should < Time.now-2.days                
+                  when "crmErp:name"
+                    grandchild_element.attributes["xsi:nil"].should == nil
+                    grandchild_element.text.should == "Contact Name"                 
+                  when "crmErp:customerId"
+                    grandchild_element.attributes["xsi:nil"].value.should == 'true'               
+                  when "crmErp:updatedAt"
+                    Time.parse(grandchild_element.text).should < Time.now-1.day   
+                  when "crmErp:uuid"
+                    grandchild_element.attributes["xsi:nil"].should == nil
+                    grandchild_element.text.should == 'C-123-456'
+                  else
+                    raise "Unknown contact element: #{grandchild_element.name}"
+                  end
+                end
+              when '456'
+                child_element.attributes['sdata:url'].value.should == "http://www.example.com/sdata/example/myContract/-/contacts('456')"
+                child_element.children.collect{|x|x.name}.sort.should == contact_attributes
+                child_element.children.each do |grandchild_element|
+                case grandchild_element.name
+                  when "crmErp:createdAt"
+                    Time.parse(grandchild_element.text).should < Time.now-2.days                
+                  when "crmErp:name"
+                    grandchild_element.attributes["xsi:nil"].should == nil
+                    grandchild_element.text.should == "Second Contact Name"                 
+                  when "crmErp:customerId"
+                    grandchild_element.attributes["xsi:nil"].value.should == 'true'               
+                  when "crmErp:updatedAt"
+                    Time.parse(child_element.text).should < Time.now-1.day   
+                  when "crmErp:uuid"
+                     grandchild_element.attributes["xsi:nil"].value.should == 'true'
+                  else
+                    raise "Unknown contact element: #{grandchild_element.name}"
+                  end
+                end
+              else
+                raise "Unknown contact attribute: #{child_element.attributes['sdata:key'].value}"
+              end
+            end
+          when 'crmErp:simpleElements'
+            element.children.collect{|x|x.name}.sort.should == ["crmErp:simpleElement", "crmErp:simpleElement"]
+            [element.children[0].text, element.children[1].text].sort.should == ["element 1", "element 2"]
+          when 'crmErp:hash'
+            element.children.size.should == 1
+            element.children[0].name.should == "crmErp:simpleObjectKey"
+            element.children[0].text.should == "simple_object_value"
+          when 'crmErp:myContacts'
+            element.keys.should == ['sdata:url']
+            element.attributes['sdata:url'].value.should == "http://www.example.com/sdata/example/myContract/-/customer('12345')/contacts"
+            element.children.size.should == 0
+          when 'crmErp:myDefaultContact'
+            element.attributes["sdata:key"].value.should == "123"
+            element.attributes["sdata:url"].value.should == "http://www.example.com/sdata/example/myContract/-/contacts('123')"
+            element.children.size.should == 0
+          when 'crmErp:name'
+            element.text.should == "Customer Name"
+          when 'crmErp:number'
+            element.text.should == "12345"          
+          when "crmErp:createdAt"
+             Time.parse(element.text).should < Time.now-2.days        
+          when "crmErp:updatedAt"
+             Time.parse(element.text).should < Time.now-1.days 
+          when 'crmErp:uuid'
+            element.text.should == "CUST-123456-654321-000000"
+          when 'crmErp:address'
+            element.attributes["sdata:key"].value.should == "12345"
+            element.attributes["sdata:url"].value.should == "http://www.example.com/sdata/example/myContract/-/addresses('12345')"
+            element.children.each do |child_element|
+              case child_element.name
+              when "crmErp:createdAt"
+                Time.parse(child_element.text).should < Time.now-2.days                
+              when "crmErp:customerId"
+                child_element.attributes["xsi:nil"].value.should == 'true'               
+              when "crmErp:updatedAt"
+                Time.parse(child_element.text).should < Time.now-1.day   
+              when "crmErp:city"
+                child_element.text.should == 'Vancouver'
+              else
+                raise "Unknown address element: #{child_element.name}"
+              end
+            end
+          else
+            raise "Unexpected customer element: #{element.name}"
+          end
+        end
+      end
+      
+      it "includes only header info for associations when in sync mode" do
+        Payload.stub :is_sync? => true
+        xml = Nokogiri::XML(@customer.to_atom(:include => 'associatedContacts').payload.to_s)
+        payload_header_assertions(xml)
+        xml.children[0].children.collect{|x|x.name}.sort.should == customer_attributes      
+        xml.children[0].children.each do |element|
+          case element.name
+          when 'crmErp:associatedContacts'
+            element.keys.should == ['sdata:url']
+            element.attributes['sdata:url'].value.should == "http://www.example.com/sdata/example/myContract/-/customer('12345')/contacts"
+            element.children.size.should == 2
+            element.children.collect{|x|x.name}.sort.should == ["crmErp:contact", "crmErp:contact"]
+            children = element.children.each do |child_element|
+              case child_element.attributes['sdata:key'].value
+              when '123'
+                child_element.attributes['sdata:url'].value.should == "http://www.example.com/sdata/example/myContract/-/contacts('123')"
+                child_element.children.size.should == 0
+              when '456'
+                child_element.attributes['sdata:url'].value.should == "http://www.example.com/sdata/example/myContract/-/contacts('456')"
+                child_element.children.size.should == 0
+              else
+                raise "Unknown contact attribute: #{child_element.attributes['sdata:key'].value}"
+              end
+            end
+          when 'crmErp:simpleElements'
+            element.children.collect{|x|x.name}.sort.should == ["crmErp:simpleElement", "crmErp:simpleElement"]
+            [element.children[0].text, element.children[1].text].sort.should == ["element 1", "element 2"]
+          when 'crmErp:hash'
+            element.children.size.should == 1
+            element.children[0].name.should == "crmErp:simpleObjectKey"
+            element.children[0].text.should == "simple_object_value"
+          when 'crmErp:myContacts'
+            element.keys.should == ['sdata:url']
+            element.attributes['sdata:url'].value.should == "http://www.example.com/sdata/example/myContract/-/customer('12345')/contacts"
+            element.children.size.should == 0
+          when 'crmErp:myDefaultContact'
+            element.attributes["sdata:key"].value.should == "123"
+            element.attributes["sdata:url"].value.should == "http://www.example.com/sdata/example/myContract/-/contacts('123')"
+            element.children.size.should == 0
+          when 'crmErp:name'
+            element.text.should == "Customer Name"
+          when 'crmErp:number'
+            element.text.should == "12345"          
+          when "crmErp:createdAt"
+             Time.parse(element.text).should < Time.now-2.days        
+          when "crmErp:updatedAt"
+             Time.parse(element.text).should < Time.now-1.days 
+          when 'crmErp:uuid'
+            element.text.should == "CUST-123456-654321-000000"
+          when 'crmErp:address'
+            element.attributes["sdata:key"].value.should == "12345"
+            element.attributes["sdata:url"].value.should == "http://www.example.com/sdata/example/myContract/-/addresses('12345')"
+            element.children.each do |child_element|
+              case child_element.name
+              when "crmErp:createdAt"
+                Time.parse(child_element.text).should < Time.now-2.days                
+              when "crmErp:customerId"
+                child_element.attributes["xsi:nil"].value.should == 'true'               
+              when "crmErp:updatedAt"
+                Time.parse(child_element.text).should < Time.now-1.day   
+              when "crmErp:city"
+                child_element.text.should == 'Vancouver'
+              else
+                raise "Unknown address element: #{child_element.name}"
+              end
+            end
+          else
+            raise "Unexpected customer element: #{element.name}"
+          end
+        end
+      end
+      
+      it "includes associations on nested include request for that association and properly parses nesting levels" do
+        # ?include='child/grandchild' should find and include the child, then traverse thru child attributes
+        # and find the grandchild, to include it too.
+        # But it should not search for or include 'grandchild' association (or any other association except
+        # 'child') from outside of the child's tree, nor should it search for or include 'child' association 
+        # (or any other association) from inside the child's tree.
+        pending # Not due June 1
+      end
+      
+      it "only shows requested attributes when a simple select parameter is given" do
+        xml = Nokogiri::XML(@customer.to_atom(:select => 'name,number,uuid').payload.to_s)
+        payload_header_assertions(xml)
+        xml.children[0].children.collect{|x|x.name}.sort.should == ['crmErp:name', 'crmErp:number', 'crmErp:uuid']      
+        xml.children[0].children.each do |element|
+          case element.name
+          when 'crmErp:name'
+            element.text.should == "Customer Name"
+          when 'crmErp:number'
+            element.text.should == "12345"          
+          when 'crmErp:uuid'
+            element.text.should == "CUST-123456-654321-000000"
+          else
+            raise "Unexpected customer element: #{element.name}"
+          end
+        end
+      end
+      
+      
+      it "only shows requested attributes when a nested select parameter is given and properly parses nesting level" do
+        pending # Not due June 1
+      end
+      
       it "properly escapes xml content in user data" do
         Customer.class_eval { acts_as_sdata(:content => :sdata_content) }
         Contact.class_eval { acts_as_sdata(:content => :sdata_content) }

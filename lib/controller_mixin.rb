@@ -29,6 +29,7 @@ module SData
             populate_open_search_for(collection)
             build_feed_links_for(collection)
             render :xml => collection, :content_type => "application/atom+xml; type=feed"
+
           rescue Exception => e 
             render :xml => ApplicationDiagnosis.new(:exception => e).to_xml(:root)
           end
@@ -162,10 +163,8 @@ module SData
           if sdata_options[:scoping]
             options[:conditions] ||= []
             sdata_options[:scoping].each do |scope|
-              scopable = self.send(scope[:object])
-              conditions = ["#{scope[:attribute]} = ?", scopable.send(scope[:key])]
-              options[:conditions][0] = [options[:conditions].to_a[0], conditions[0]].compact.join(' and ')
-              options[:conditions] << conditions[1].to_s
+              options[:conditions][0] = [options[:conditions].to_a[0], scope].compact.join(' and ')
+              options[:conditions] << current_user.id.to_s
             end
           end
         
@@ -181,6 +180,7 @@ module SData
           #if user has hundreds of records but requests first 10, we shouldnt load them all into memory
           #but use sql query to count how many exist in total, and then load the first 10 only
 
+          #FIXME: do not return records deleted through acts_as_paranoid!
           results = sdata_options[:model].all(options)
           @total_results = results.count
           paginated_results = results[zero_based_start_index,records_to_return]

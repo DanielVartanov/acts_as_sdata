@@ -108,9 +108,7 @@ describe ControllerMixin, "#sdata_scope" do
                     :title => 'Billing Boss | Trading Accounts',
                     :default_items_per_page => 10,
                     :maximum_items_per_page => 100},
-                    :scoping => [{:attribute => :created_by_id, 
-                                  :object    => :current_user,
-                                  :key       => :id}]
+                    :scoping => ["created_by_id = ?"]
         end
         @user = User.new.populate_defaults
       before :each do

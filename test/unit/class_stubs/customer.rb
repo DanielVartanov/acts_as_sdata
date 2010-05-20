@@ -1,6 +1,6 @@
 class Customer < ModelBase
   
-  attr_accessor :id, :created_by, :name, :number, :contacts, :uuid, :created_at, :updated_at
+  attr_accessor :id, :created_by, :name, :number, :contacts, :uuid, :created_at, :updated_at, :address
   def populate_defaults
     self.id = @id || object_id.abs
     self.name = @name || "Customer Name"
@@ -9,6 +9,7 @@ class Customer < ModelBase
     self.uuid = @uuid || "CUST-123456-654321-000000"
     self.created_at = @created_at || Time.now-2.days
     self.updated_at = @updated_at || Time.now-1.day
+    self.address = @address || Address.new(self)
     self
   end
   
@@ -37,10 +38,14 @@ class Customer < ModelBase
       :updated_at          => {:value => @updated_at, :precedence => 3},
       :my_default_contact  => {:value => self.default_contact, :precedence => 3},
       :my_contacts         => {:value => @contacts, :precedence => 5, :resource_collection => 
-                                {:url => 'contacts', :parent => 'customer'}
+                                {:url => 'contacts', :parent => self} #treated as a CHILD of customer
                               },
+      :associated_contacts  => {:value => @contacts, :precedence => 3, :resource_collection => 
+                                {:url => 'contacts', :parent => self}, :type => :association
+                              }, #treated as an ASSOCIATION of customer
       :simple_elements   => {:value => ['element 1', 'element 2'], :precedence => 6},
-      :hash     => {:value => {:simple_object_key => 'simple_object_value'}, :precedence => 6}
+      :hash     => {:value => {:simple_object_key => 'simple_object_value'}, :precedence => 6},
+      :address => {:value => @address, :precedence => 5}
     }
   end
   
