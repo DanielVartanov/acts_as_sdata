@@ -30,15 +30,17 @@ describe Predicate do
   end
 
   describe "predicate string is invalid" do
+
     it "should not accept unrecognized format" do
       @predicate = Predicate.parse('blah-blah-blah')
       ConditionsBuilder.should_not_receive :build_conditions
-      @predicate.to_conditions.should == {}
+      @predicate.to_conditions.should == []
     end
+
     it "should not accept non-quote-marked empty string" do
       @predicate = Predicate.parse('born_at gt ')
       ConditionsBuilder.should_not_receive :build_conditions
-      @predicate.to_conditions.should == {}
+      @predicate.to_conditions.should == []
     end
   end
 end
