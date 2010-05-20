@@ -14,5 +14,6 @@ $SDATA_SCHEMAS = {
                    "xsi"        => "http://www.w3.org/2001/XMLSchema-instance"
                  }
 
-__DIR__ = File.dirname(__FILE__)
-Dir.glob(File.join(__DIR__, 'lib', '**', '*.rb')) { |filename| require filename }
+dir = File.dirname(__FILE__)
+files = %w[ active_record_mixin atom_content_mixin atom_entry_mixin conditions_builder controller_mixin diagnosis namespace_definitions payload predicate route_mapper router_mixin virtual_base]
+files.each {|file| require File.join(dir, 'lib', file) }
