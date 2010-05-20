@@ -1,9 +1,8 @@
 module SData
   class Predicate < Struct.new(:field, :relation, :value)
-    def self.parse(predicate_string)
-
+    def self.parse(payload_map, predicate_string)
       match_data = predicate_string.match(/(\w+)\s(gt|lt|eq)\s('?.+'?|'')/) || []
-      self.new match_data[1], match_data[2], strip_quotes(match_data[3])
+      self.new payload_map.map_field(match_data[1].underscore).tap{|v| puts v}, match_data[2], strip_quotes(match_data[3])
     end
 
     def self.strip_quotes(value)

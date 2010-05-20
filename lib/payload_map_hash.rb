@@ -13,6 +13,10 @@ module SData
         subset :baze_field
       end
 
+      def map_field(field)
+        baze_fields[field.to_sym]
+      end
+
     protected
 
       def subset(mapping_type)

@@ -156,10 +156,10 @@ module SData
           options = {}
 
           if params.key? :predicate
-            predicate = SData::Predicate.parse(CGI::unescape(params[:predicate]))
+            predicate = SData::Predicate.parse(model_class.payload_map, CGI::unescape(params[:predicate]))
             options[:conditions] = predicate.to_conditions
           end
-          
+
           if sdata_options[:scoping]
             options[:conditions] ||= []
             sdata_options[:scoping].each do |scope|
