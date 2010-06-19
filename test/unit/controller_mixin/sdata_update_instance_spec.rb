@@ -3,7 +3,6 @@ require File.join(File.dirname(__FILE__), '..', 'spec_helper')
 include SData
 
 describe ControllerMixin, "#sdata_update_instance" do
-
     class BaseClass
       attr_accessor :status
       def id
@@ -20,7 +19,7 @@ describe ControllerMixin, "#sdata_update_instance" do
       end
     end
 
-    class VirtualModel < VirtualBase
+    class VirtualModel < SData::VirtualBase
       attr_accessor :baze
     end
     
@@ -33,6 +32,7 @@ describe ControllerMixin, "#sdata_update_instance" do
     end
 
     before :each do
+      pending # not currently supported
       @controller = Base.new
     end  
 

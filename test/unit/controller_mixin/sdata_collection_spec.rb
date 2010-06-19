@@ -7,9 +7,12 @@ describe ControllerMixin, "#sdata_collection" do
     before :all do
       @time = Time.now - 1.day
       
-      class Model
-        extend ActiveRecordMixin
+      class ModelBob
+        extend SData::ActiveRecordExtensions::Mixin
         acts_as_sdata
+        def self.name
+          "SData::Contracts::CrmErp::ModelBob"
+        end
         def id
           1
         end
@@ -24,7 +27,10 @@ describe ControllerMixin, "#sdata_collection" do
           "John Smith"
         end
         def sdata_content
-          "Model ##{self.id}: #{self.name}"
+          "ModelBob ##{self.id}: #{self.name}"
+        end
+        def payload_map
+          {}
         end
       end
     end
@@ -35,7 +41,7 @@ describe ControllerMixin, "#sdata_collection" do
         Base.extend ControllerMixin
 
 
-        Base.acts_as_sdata  :model => Model,
+        Base.acts_as_sdata  :model => ModelBob,
                             :feed => { :id => 'some-unique-id',
                                        :author => 'Test Author',
                                        :path => '/test_resource',
@@ -51,10 +57,10 @@ describe ControllerMixin, "#sdata_collection" do
                             :protocol => 'http', 
                             :host_with_port => 'http://example.com', 
                             :request_uri => Base.sdata_options[:feed][:path],
-                            :path => $SDATA_STORE_PATH + '/testResource',
+                            :path => SData.store_path + '/-/testResource',
                             :query_parameters => {}),
                           :params => {}
-        @controller.sdata_options[:model].stub! :all => [Model.new, Model.new]
+        @controller.sdata_options[:model].stub! :all => [ModelBob.new, ModelBob.new]
       end
 
       it "should render Atom feed" do        
@@ -62,7 +68,7 @@ describe ControllerMixin, "#sdata_collection" do
         @controller.should_receive(:render) do |hash|
           hash[:content_type].should == "application/atom+xml; type=feed"
           hash[:xml].should be_kind_of(Atom::Feed)
-          hash[:xml].entries.should == Model.all.map{|entry| entry.to_atom({})}
+          hash[:xml].entries.should == ModelBob.all.map{|entry| entry.to_atom({})}
         end
         @controller.sdata_collection
       end

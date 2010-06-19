@@ -1,21 +1,20 @@
 require File.join(File.dirname(__FILE__), '..', 'spec_helper')
-include SData
 
 module Atom
   class Feed
     def opensearch(key)
-      simple_extensions["{#{$SDATA_SCHEMAS["opensearch"]},#{key}}"][0]
+      simple_extensions["{#{SData.config[:schemas]["opensearch"]},#{key}}"][0]
     end
   end
 end
 
-describe ControllerMixin, "#sdata_collection" do
+describe SData::ControllerMixin, "#sdata_collection" do
   describe "given a model which acts as sdata" do
     before :all do
       @time = Time.now - 1.day
       
       class Model
-        extend ActiveRecordMixin
+        extend SData::ActiveRecordExtensions::Mixin
         acts_as_sdata
         def id
           1
@@ -40,15 +39,15 @@ describe ControllerMixin, "#sdata_collection" do
       end
     end
 
-    def stub_params(params)
-      @controller.request.query_parameters = params
-      @controller.stub! :params => params
+    def stub_params(params,query=true)
+      @controller.request.query_parameters = params if query
+      @controller.stub! :params => params.merge({:dataset => '-'})
     end
 
     describe "given a controller which acts as sdata" do
       before :all do
         Base = Class.new(ActionController::Base)
-        Base.extend ControllerMixin
+        Base.extend SData::ControllerMixin
 
 
         Base.acts_as_sdata  :model => Model,
@@ -65,9 +64,8 @@ describe ControllerMixin, "#sdata_collection" do
         @controller = Base.new
         @controller.stub! :request => OpenStruct.new(
                             :protocol => 'http://', 
-                            :host_with_port => $APPLICATION_HOST, 
+                            :host_with_port => 'http://example.com', 
                             :request_uri => Base.sdata_options[:feed][:path],
-                            :path => $SDATA_STORE_PATH + 'testResource',
                             :query_parameters => {}),
                           :params => {}
       end
@@ -78,6 +76,7 @@ describe ControllerMixin, "#sdata_collection" do
    
         end
         it "should display default opensearch values" do
+          stub_params({:dataset => '-'}, false)
           @controller.should_receive(:render) do |hash|
             hash[:xml].opensearch("itemsPerPage").should == Base.sdata_options[:feed][:default_items_per_page]
             hash[:xml].opensearch("totalResults").should == 0
@@ -85,14 +84,16 @@ describe ControllerMixin, "#sdata_collection" do
             hash[:xml].entries.size.should == 0
             hash[:xml].links.size.should == 1
             hash[:xml].links[0].rel.should == 'self'
-            hash[:xml].links[0].href.should == "http://www.example.com/sdata/example/myContract/-/testResource"
+            hash[:xml].links[0].href.should == "http://www.example.com/sdata/example/myContract/-/models"
           end
           @controller.sdata_collection
         end
 
         it "should correctly parse opensearch values to xml" do
           @controller.should_receive(:render) do |hash|
-            hash[:xml].to_xml.gsub(/\n\s*/, '').match(/<feed.*<opensearch:itemsPerPage>5<\/opensearch:itemsPerPage><opensearch:totalResults>0<\/opensearch:totalResults><opensearch:startIndex>1<\/opensearch:startIndex>.*<\/feed>$/).should_not == nil
+            hash[:xml].to_xml.gsub(/\n\s*/, '').match(/<feed.*<opensearch:itemsPerPage>5<\/opensearch:itemsPerPage>.*<\/feed>$/).should_not == nil
+            hash[:xml].to_xml.gsub(/\n\s*/, '').match(/<feed.*<opensearch:totalResults>0<\/opensearch:totalResults>.*<\/feed>$/).should_not == nil
+            hash[:xml].to_xml.gsub(/\n\s*/, '').match(/<feed.*<opensearch:startIndex>1<\/opensearch:startIndex>.*<\/feed>$/).should_not == nil
           end
           @controller.sdata_collection
         end
@@ -153,13 +154,14 @@ describe ControllerMixin, "#sdata_collection" do
         end
         
         it "should display default opensearch and link values" do
+          stub_params({})
           @controller.should_receive(:render) do |hash|
             hash[:xml].opensearch("itemsPerPage").should == Base.sdata_options[:feed][:default_items_per_page]
             hash[:xml].opensearch("totalResults").should == 15
             hash[:xml].opensearch("startIndex").should == 1
             hash[:xml].entries.size.should == 5
             verify_content_for(hash[:xml].entries, 1..5)
-            verify_links_for(hash[:xml].links, :path => "http://www.example.com/sdata/example/myContract/-/testResource", 
+            verify_links_for(hash[:xml].links, :path => "http://www.example.com/sdata/example/myContract/-/models", 
               :count => false, :self => false, :first => '1', :last => '11', :next => '6')
           end
           @controller.sdata_collection
@@ -319,7 +321,7 @@ describe ControllerMixin, "#sdata_collection" do
             hash[:xml].opensearch("startIndex").should == 1
             hash[:xml].entries.size.should == 5
             verify_content_for(hash[:xml].entries, 1..5)
-            verify_links_for(hash[:xml].links, :path => "http://www.example.com/sdata/example/myContract/-/testResource", 
+            verify_links_for(hash[:xml].links, :path => "http://www.example.com/sdata/example/myContract/-/models", 
               :count => 'asdf', :self => false, :first => '1', :last => '11', :next => '6')
           end
           @controller.sdata_collection
@@ -333,7 +335,7 @@ describe ControllerMixin, "#sdata_collection" do
             hash[:xml].opensearch("startIndex").should == 1
             hash[:xml].entries.size.should == 5
             verify_content_for(hash[:xml].entries, 1..5)
-            verify_links_for(hash[:xml].links, :path => "http://www.example.com/sdata/example/myContract/-/testResource", 
+            verify_links_for(hash[:xml].links, :path => "http://www.example.com/sdata/example/myContract/-/models", 
               :count => '-3', :self => false, :first => '1', :last => '11', :next => '6')
           end
           @controller.sdata_collection
@@ -353,7 +355,7 @@ describe ControllerMixin, "#sdata_collection" do
             hash[:xml].opensearch("startIndex").should == 3
             hash[:xml].entries.size.should == 5
             verify_content_for(hash[:xml].entries, 3..7)
-            verify_links_for(hash[:xml].links, :path => "http://www.example.com/sdata/example/myContract/-/testResource", 
+            verify_links_for(hash[:xml].links, :path => "http://www.example.com/sdata/example/myContract/-/models", 
               :count => '5', :self => '3', :first => '1', :last => '13', :previous => '1', :next => '8')
           end
           @controller.sdata_collection
@@ -367,7 +369,7 @@ describe ControllerMixin, "#sdata_collection" do
             hash[:xml].opensearch("startIndex").should == 9
             hash[:xml].entries.size.should == 7
             verify_content_for(hash[:xml].entries, 9..15)
-            verify_links_for(hash[:xml].links, :path => "http://www.example.com/sdata/example/myContract/-/testResource", 
+            verify_links_for(hash[:xml].links, :path => "http://www.example.com/sdata/example/myContract/-/models", 
               :count => '10', :self => '9', :first => '1', :last => '9', :previous => '1')
           end
           @controller.sdata_collection

@@ -30,7 +30,7 @@ describe ControllerMixin, "#sdata_collection" do
         map.test '/test', :controller => 'test', :action => 'test_action'
         
         map.sdata_resource :items
-        map.sdata_resource :items, :prefix => '/sdata/example/crmErp/-/'
+        map.sdata_resource :items, :prefix => '/sdata/example/crmErp'
       end
     end
 
@@ -39,35 +39,100 @@ describe ControllerMixin, "#sdata_collection" do
       @router.recognize(request).should == TestController
     end
 
-    it "recognizes basic route" do        
+    it "recognizes collection route" do        
       request = mock_request('/items', :get,{})
       @router.recognize(request).should == ItemsController
       request.path_parameters.should == {"controller"=>"items", "action"=>"sdata_collection"}
     end
 
-    it "recognizes route with prefix" do        
+    it "recognizes collection route with default prefix" do        
       request = mock_request('/sdata/example/crmErp/-/items', :get,{})
       @router.recognize(request)
-      request.path_parameters.should == {"controller"=>"items", "action"=>"sdata_collection"}
+      request.path_parameters.should == {"controller"=>"items", "action"=>"sdata_collection", "dataset" => "-"}
     end
 
-    it "recognizes route with predicate" do        
-      request = mock_request("/items(id gt 1)", :get, {})
+    it "recognizes collection route with custom prefix" do        
+      request = mock_request('/sdata/example/crmErp/asdf/items', :get,{})
       @router.recognize(request)
-      request.path_parameters.should == {"controller"=>"items", "action"=>"sdata_collection", "predicate"=>"id gt 1"}
+      request.path_parameters.should == {"controller"=>"items", "action"=>"sdata_collection", "dataset" => "asdf"}
     end
 
-    it "recognizes route with linked collection" do        
+    describe "search with parenthesis" do
+      it "recognizes simple instance query in parenthesis" do
+        request = mock_request("/items(id gt 1)", :get, {})
+        @router.recognize(request)
+        request.path_parameters.should == {"controller"=>"items", "action"=>"sdata_show_instance", "predicate"=>"id gt 1"}
+      end
+
+      it "recognizes instance query in parenthesis within linked items" do
+        request = mock_request("/items/$linked(id gt 1)", :get, {})
+        @router.recognize(request)
+        request.path_parameters.should == {"controller"=>"items", "action"=>"sdata_show_instance", "condition"=>"$linked", "predicate"=>"id gt 1"}
+      end
+    end
+
+    describe "scoping with where-clauses" do
+      it "recognizes scoping query within non-linked items" do
+        request = mock_request("/items", :get, {'where name eq asdf' => nil})
+        @router.recognize(request)
+        request.path_parameters.should == {"controller"=>"items", "action"=>"sdata_collection", "where name eq asdf" => nil}
+      end
+      
+      it "recognizes scoping query within linked items" do
+        request = mock_request("/items/$linked", :get,  {'where name eq asdf' => nil})
+        @router.recognize(request)
+        request.path_parameters.should == {"controller"=>"items", "action"=>"sdata_collection", "condition"=>"$linked", "where name eq asdf" => nil}
+      end
+    end
+
+    it "recognizes collection route with linked collection" do        
       request = mock_request("/items/$linked", :get, {})
       @router.recognize(request)
       request.path_parameters.should == {"controller"=>"items", "action"=>"sdata_collection", "condition"=>"$linked" }
     end
 
-    it "recognizes route with linked collection and predicate" do        
-      request = mock_request("/items/$linked(name eq 'Second')", :get, {})
+    it "recognizes syncSource route for collection" do        
+      request = mock_request("/items/$syncSource", :post, {})
       @router.recognize(request)
-      request.path_parameters.should == {"controller"=>"items", "action"=>"sdata_collection", "condition"=>"$linked", "predicate"=>"name eq 'Second'"}
+      request.path_parameters.should == {"controller"=>"items", "action"=>"sdata_collection_sync_feed" }
     end
 
+    it "recognizes syncSource status route" do        
+      request = mock_request("/items/$syncSource('DD052E5C-BFAD-4ffa-8D54-D696E4959497')", :get, {})
+      @router.recognize(request)
+      request.path_parameters.should == {"controller"=>"items", "action"=>"sdata_collection_sync_feed_status", "trackingID" => "'DD052E5C-BFAD-4ffa-8D54-D696E4959497'" }
+    end
+
+    it "recognizes syncSource delete route" do        
+      request = mock_request("/items/$syncSource('bobob')", :delete, {})
+      @router.recognize(request)
+      request.path_parameters.should == {"controller"=>"items", "action"=>"sdata_collection_sync_feed_delete", "trackingID" => "'bobob'"}
+    end
+
+    it "recognizes syncResults route for collection" do        
+      request = mock_request("/items/$syncResults('bobob')", :post, {})
+      @router.recognize(request)
+      request.path_parameters.should == {"controller"=>"items", "action"=>"sdata_collection_sync_results", "trackingID" => "'bobob'" }
+    end
+
+    it "recognizes create link route" do        
+      request = mock_request("/items/$linked", :post, {})
+      @router.recognize(request)
+      request.path_parameters.should == {"controller"=>"items", "action"=>"sdata_create_link", "condition"=>"$linked" }
+    end
+
+    it "recognizes instance route with id" do        
+      request = mock_request("/items('123')", :get, {})
+      @router.recognize(request)
+      request.path_parameters.should == {"controller"=>"items", "action"=>"sdata_show_instance", "instance_id" => "'123'"}
+    end
+
+    it "recognizes instance route with linked uuid" do        
+      request = mock_request("/items/$linked('uuid')", :get, {})
+      @router.recognize(request)
+      request.path_parameters.should == {"controller"=>"items", "action"=>"sdata_show_instance", "condition" => "$linked", "instance_id" => "'uuid'"}
+    end
+
+    
   end
 end

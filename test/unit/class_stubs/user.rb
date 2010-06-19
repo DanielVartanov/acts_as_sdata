@@ -1,6 +1,6 @@
 class User < ModelBase
   
-  attr_accessor :id, :name, :password, :customers, :created_at, :updated_at
+  attr_writer :name, :password, :customers, :created_at, :updated_at
   def populate_defaults
     self.id = @id || object_id.abs
     self.name = @name || "username"
@@ -18,18 +18,14 @@ class User < ModelBase
   def sdata_content
     "User ##{self.id}: #{self.name}"
   end
+
+  define_payload_map  :name                => { :proc => lambda { @name }, :precedence => 2 },
+                      :record_id           => { :proc => lambda { @record_id }, :precedence => 2 },
+                      :uuid                => { :proc => lambda { @uuid }, :precedence => 2 },
+                      :created_at          => { :proc => lambda { @created_at }, :precedence => 3 },
+                      :updated_at          => { :proc => lambda { @updated_at }, :precedence => 3 }
   
-  def payload_map(opts={})
-    {
-      :name                => {:value => @name, :precedence => 2}, 
-      :record_id           => {:value => @record_id, :precedence => 2},
-      :uuid                => {:value => @uuid, :precedence => 2},
-      :created_at          => {:value => @created_at, :precedence => 3},
-      :updated_at          => {:value => @updated_at, :precedence => 3}
-    }
-  end 
-  
-  protected
+protected
   
   def build_customers(options)
     the_customers = []

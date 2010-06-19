@@ -40,11 +40,11 @@ describe ConditionsBuilder do
     end
 
     it "should return empty hash is arguments are invalid" do
-      ConditionsBuilder.build_conditions(nil, :gt, 1).should == {}
-      ConditionsBuilder.build_conditions('field', :invalid_relation, 1).should == {}
-      ConditionsBuilder.build_conditions('field', :gt).should == {}
-      ConditionsBuilder.build_conditions('field', :gt, 'value', 'redundant_value').should == {}
-      ConditionsBuilder.build_conditions('field', :between, 'insufficient value').should == {}
+      ConditionsBuilder.build_conditions(nil, :gt, 1).should == []
+      ConditionsBuilder.build_conditions('field', :invalid_relation, 1).should == []
+      ConditionsBuilder.build_conditions('field', :gt).should == []
+      ConditionsBuilder.build_conditions('field', :gt, 'value', 'redundant_value').should == []
+      ConditionsBuilder.build_conditions('field', :between, 'insufficient value').should == []
     end
 
     def quoted(column_name)

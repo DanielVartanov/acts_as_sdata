@@ -21,7 +21,9 @@ describe ControllerMixin, "#build_sdata_feed" do
                                     :protocol => 'http', 
                                     :host_with_port => 'http://example.com', 
                                     :request_uri => Base.sdata_options[:feed][:path],
-                                    :path => $SDATA_STORE_PATH + '/testResource')
+                                    :path => SData.store_path + '/-/testResource'),
+                        :params => {:dataset => '-'},
+                        :sdata_options => {:feed => {}, :model => OpenStruct.new(:name => 'base', :sdata_resource_kind_url => '')}
 
                                     
     end
@@ -40,8 +42,8 @@ describe ControllerMixin, "#build_sdata_feed" do
     
     it "should assign categories" do
       @controller.build_sdata_feed.categories.size.should == 1
-      @controller.build_sdata_feed.categories[0].term.should == 'collection'
-      @controller.build_sdata_feed.categories[0].label.should == 'Resource Collection'
+      @controller.build_sdata_feed.categories[0].term.should == 'bases'
+      @controller.build_sdata_feed.categories[0].label.should == 'Bases'
       @controller.build_sdata_feed.categories[0].scheme.should == "http://schemas.sage.com/sdata/categories"
     end
   end

@@ -1,12 +1,20 @@
 class Customer < ModelBase
+
+  attr_writer :created_by, :name, :number, :contacts, :created_at, :updated_at, :address
   
-  attr_accessor :id, :created_by, :name, :number, :contacts, :uuid, :created_at, :updated_at, :address
+  def self.is_a?(value)
+    # Don't really like doing this but don't see a quick better way
+    return true if value == SData::VirtualBase
+    super
+  end
+  def baze
+    self
+  end
   def populate_defaults
     self.id = @id || object_id.abs
     self.name = @name || "Customer Name"
     self.number = @number || 12345
     self.contacts = @contacts || build_contacts(:number => 2, :created_by => self)
-    self.uuid = @uuid || "CUST-123456-654321-000000"
     self.created_at = @created_at || Time.now-2.days
     self.updated_at = @updated_at || Time.now-1.day
     self.address = @address || Address.new(self)
@@ -29,26 +37,26 @@ class Customer < ModelBase
     "Customer ##{self.id}: #{self.name}"
   end
   
-  def payload_map(opts={})
-    {
-      :name                => {:value => @name, :precedence => 2}, 
-      :number              => {:value => @number, :precedence => 5},
-      :uuid                => {:value => @uuid, :precedence => 2},
-      :created_at          => {:value => @created_at, :precedence => 3},
-      :updated_at          => {:value => @updated_at, :precedence => 3},
-      :my_default_contact  => {:value => self.default_contact, :precedence => 3},
-      :my_contacts         => {:value => @contacts, :precedence => 5, :resource_collection => 
-                                {:url => 'contacts', :parent => self} #treated as a CHILD of customer
-                              },
-      :associated_contacts  => {:value => @contacts, :precedence => 3, :resource_collection => 
-                                {:url => 'contacts', :parent => self}, :type => :association
-                              }, #treated as an ASSOCIATION of customer
-      :simple_elements   => {:value => ['element 1', 'element 2'], :precedence => 6},
-      :hash     => {:value => {:simple_object_key => 'simple_object_value'}, :precedence => 6},
-      :address => {:value => @address, :precedence => 5}
-    }
-  end
-  
+  define_payload_map  :name                => { :proc => lambda { @name }, :precedence => 2 },
+                      :number              => { :proc => lambda { @number }, :precedence => 5 },
+                      :created_at          => { :proc => lambda { @created_at }, :precedence => 3 },
+                      :updated_at          => { :proc => lambda { @updated_at }, :precedence => 3 },
+                      :my_default_contact  => { :proc => lambda { self.default_contact }, :precedence => 3 },
+                      :my_contacts         => { :proc => lambda { @contacts },
+                                                :precedence => 5, #treated as a CHILD of customer
+                                                :type => :child
+                                              },
+                      :associated_contacts => { :proc => lambda { @contacts },
+                                                :precedence => 3,
+                                                :type => :association
+                                              }, #treated as an ASSOCIATION of customer
+                                              
+                      :address             => { :proc => lambda { @address }, :precedence => 5 },
+
+                      :simple_elements     => { :static_value => ['element 1', 'element 2'], :precedence => 6 },
+
+                      :hash_value                => { :static_value => { :simple_object_key => 'simple_object_value' }, :precedence => 6 }
+
   def build_contacts(options)
     the_contacts = []
     for i in 1..options[:number] do

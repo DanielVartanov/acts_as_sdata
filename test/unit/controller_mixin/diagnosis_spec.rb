@@ -5,7 +5,7 @@ include SData
 describe ControllerMixin, "#sdata_collection" do
   describe "given a model which acts as sdata" do
     before :all do
-      Customer.extend ActiveRecordMixin
+      Customer.extend SData::ActiveRecordExtensions::Mixin
       Customer.class_eval { acts_as_sdata }
       class EntryDiagnosisCustomer < Customer
         def resource_header_attributes(*params)
@@ -40,7 +40,7 @@ describe ControllerMixin, "#sdata_collection" do
                             :protocol => 'http://', 
                             :host_with_port => 'example.com', 
                             :request_uri => Base.sdata_options[:feed][:path],
-                            :path => $SDATA_STORE_PATH + 'testResource',
+                            :path => SData.store_path + '/-/testResource',
                             :query_parameters => {}),
                          :params => {}
       end
@@ -55,10 +55,10 @@ describe ControllerMixin, "#sdata_collection" do
             entry.id.should_not == nil
             entry.content.should_not == nil
             if entry.diagnosis.nil?
-              entry.payload.should_not == nil
+              entry.sdata_payload.should_not == nil
               entry.content.should_not == nil
             else
-              entry.payload.should == nil
+              entry.sdata_payload.should == nil
               entry.diagnosis[0].children.size.should == 4
               entry.diagnosis[0].children.detect{|x|x.name=='sdata:severity'}.children[0].to_s.should == 'error'
               entry.diagnosis[0].children.detect{|x|x.name=='sdata:sdataCode'}.children[0].to_s.should == 'ApplicationDiagnosis'
@@ -81,7 +81,7 @@ describe ControllerMixin, "#sdata_collection" do
           hash[:xml].entries.size.should == 1
           hash[:xml].entries.each do |entry|
             entry.id.should_not == nil
-            entry.payload.should_not == nil
+            entry.sdata_payload.should_not == nil
             entry.content.should_not == nil
             entry.diagnosis.should == nil
           end
@@ -105,9 +105,9 @@ describe ControllerMixin, "#sdata_collection" do
             entry.id.should_not == nil
             entry.content.should_not == nil
             if entry.diagnosis.nil?
-              entry.payload.should_not == nil
+              entry.sdata_payload.should_not == nil
             else
-              entry.payload.should == nil
+              entry.sdata_payload.should == nil
               entry.diagnosis[0].children.detect{|x|x.name=='sdata:severity'}.children[0].to_s.should == 'error'
               entry.diagnosis[0].children.detect{|x|x.name=='sdata:sdataCode'}.children[0].to_s.should == 'ApplicationDiagnosis'
               entry.diagnosis[0].children.detect{|x|x.name=='sdata:message'}.children[0].to_s.should == "Exception while trying to construct payload map"
@@ -183,7 +183,7 @@ describe ControllerMixin, "#sdata_collection" do
                             :protocol => 'http://', 
                             :host_with_port => 'example.com', 
                             :request_uri => NewBase.sdata_options[:feed][:path],
-                            :path => $SDATA_STORE_PATH + 'testResource',
+                            :path => SData.store_path + '/-/testResource',
                             :query_parameters => {}),
                          :params => {}
       end  

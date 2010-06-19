@@ -1,12 +1,17 @@
 require File.join(File.dirname(__FILE__), '..', 'spec_helper')
                                                           
-include SData
 
-describe ActiveRecordMixin, "#to_atom" do
-  describe "given a class extended by ActiveRecordExtentions" do
+describe SData::ActiveRecordExtensions::Mixin, "#to_atom" do
+  describe "given a class extended by ActiveRecordExtensions" do
     before :all do
       Base = Class.new
-      Base.extend ActiveRecordMixin
+      class Base
+        def self.name
+          super_name = super
+          "SData::Contracts::CrmErp::#{super_name}"
+        end
+      end
+      Base.extend SData::ActiveRecordExtensions::Mixin
     end
 
     describe "when .acts_as_sdata is called without arguments" do
@@ -18,36 +23,48 @@ describe ActiveRecordMixin, "#to_atom" do
       end
 
       it "should return an Atom::Entry instance" do
-        @model.to_atom.should be_kind_of(Atom::Entry)
+        # begin
+        @model.to_atom(:dataset => '-').should be_kind_of(Atom::Entry)
+        # rescue Exception => e
+        #   puts "e: #{e.inspect}"
+        # puts(e.backtrace.join("\n"))
+        # end
+      
       end
 
       it "should assign model name to Atom::Entry#content" do
-        @model.to_atom.content.should == 'Base #1: John Smith'
+        @model.to_atom(:dataset => '-').content.should == 'Base #1: John Smith'
       end
 
       it "should assign model name and id to Atom::Entry#title" do
-        @model.to_atom.title.should == 'Base 1'
+        @model.to_atom(:dataset => '-').title.should == 'Base 1'
       end
 
       it "should assign Atom::Entry#updated" do
-        @model.to_atom.updated.should < Time.now-1.day
-        @model.to_atom.updated.should > Time.now-1.day-1.minute        
+        Time.parse(@model.to_atom(:dataset => '-').updated).should < Time.now-1.day
+        Time.parse(@model.to_atom(:dataset => '-').updated).should > Time.now-1.day-1.minute        
       end
 
       it "should assign Atom::Entry#links" do
-        @model.to_atom.links.size.should == 1
-        @model.to_atom.links[0].rel.should == 'self'
-        @model.to_atom.links[0].href.should == "http://www.example.com/sdata/example/myContract/-/bases('1')"
+        @model.to_atom(:dataset => '-').links.size.should == 1
+        @model.to_atom(:dataset => '-').links[0].rel.should == 'self'
+        @model.to_atom(:dataset => '-').links[0].href.should == "http://www.example.com/sdata/example/myContract/-/bases('1')"
+      end
+
+      it "should assign Atom::Entry#links when param query is present" do
+        @model.to_atom(:dataset => '-', :select => 'attribute').links.size.should == 1
+        @model.to_atom(:dataset => '-', :select => 'attribute').links[0].rel.should == 'self'
+        @model.to_atom(:dataset => '-', :select => 'attribute').links[0].href.should == "http://www.example.com/sdata/example/myContract/-/bases('1')?select=attribute"
       end
 
       it "should assign Atom::Entry::id" do
-        @model.to_atom.id.should == "http://www.example.com/sdata/example/myContract/-/bases('1')"
+        @model.to_atom(:dataset => '-').id.should == "http://www.example.com/sdata/example/myContract/-/bases('1')"
       end
 
       it "should assign Atom::Entry::categories" do
         @model.to_atom.categories.size.should == 1
-        @model.to_atom.categories[0].term.should == "resource"
-        @model.to_atom.categories[0].label.should == "Resource"
+        @model.to_atom.categories[0].term.should == "base"
+        @model.to_atom.categories[0].label.should == "Base"
         @model.to_atom.categories[0].scheme.should == "http://schemas.sage.com/sdata/categories"
       end
 
@@ -75,7 +92,7 @@ describe ActiveRecordMixin, "#to_atom" do
 
       it "should evaulate given lambda's in the correct context" do
         @model.to_atom.title.should == '1: Test'
-        @model.to_atom.content.should == 'Test'
+        @model.to_atom.content.should == 'Base #1: Test'
       end
     end
   end

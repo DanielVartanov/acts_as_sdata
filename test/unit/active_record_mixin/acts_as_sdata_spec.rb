@@ -1,12 +1,11 @@
 require File.join(File.dirname(__FILE__), '..', 'spec_helper')
 
-include SData
 
-describe ActiveRecordMixin do
-  describe "given a class extended by ActiveRecordExtentions" do
+describe SData::ActiveRecordExtensions::Mixin do
+  describe "given a class extended by ActiveRecordExtensions" do
     before :all do
       Base = Class.new
-      Base.extend ActiveRecordMixin
+      Base.extend SData::ActiveRecordExtensions::Mixin
     end
 
     describe ".acts_as_sdata" do

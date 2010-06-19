@@ -1,19 +1,36 @@
-require 'active_support'
-require 'action_controller'
-require 'atom' # TODO: add ratom _dependency_
+# RADAR: The order makes a difference, and globbing Dir produces different results on different machines.
+# We can .sort the glob, but still the order would be wrong, and we'd need to have repeated requires in
+# Individual files. Michael and I think it's easier to statically call them all in one place in the right order.
 
-#needed to be defined for each app and contract. refactor if more than 1 contract is supported.
-
-$SDATA_SCOPE = "@user"
-$SDATA_SCHEMAS = { 
-                   "crmErp"     => "http://schemas.sage.com/crmErp",
-                   "http"       => "http://schemas.sage.com/sdata/http/2008/1",
-                   "opensearch" => "http://a9.com/-/spec/opensearch/1.1",
-                   "sdata"      => "http://schemas.sage.com/sdata/2008/1",
-                   "sle"        => "http://www.microsoft.com/schemas/rss/core/2005",
-                   "xsi"        => "http://www.w3.org/2001/XMLSchema-instance"
-                 }
-
-dir = File.dirname(__FILE__)
-files = %w[ active_record_mixin atom_content_mixin atom_entry_mixin conditions_builder controller_mixin diagnosis namespace_definitions payload predicate route_mapper router_mixin virtual_base payload_map ]
-files.each {|file| require File.join(dir, 'lib', file) }
+__DIR__ = File.dirname(__FILE__)
+require File.join(__DIR__, 'lib', 's_data')
+require File.join(__DIR__, 'lib', 's_data', 'exceptions')
+require File.join(__DIR__, 'lib', 's_data', 'formatting.rb')
+require File.join(__DIR__, 'lib', 's_data', 'router_mixin.rb')
+require File.join(__DIR__, 'lib', 's_data', 'sync', 'sdata_syncing_mixin.rb')
+require File.join(__DIR__, 'lib', 's_data', 'sync', 'controller_mixin.rb')
+require File.join(__DIR__, 'lib', 's_data', 'payload_map.rb')
+require File.join(__DIR__, 'lib', 's_data', 'controller_mixin', 's_data_instance.rb')
+require File.join(__DIR__, 'lib', 's_data', 'controller_mixin', 's_data_feed.rb')
+require File.join(__DIR__, 'lib', 's_data', 'controller_mixin', 'collection_scope.rb')
+require File.join(__DIR__, 'lib', 's_data', 'controller_mixin', 'actions.rb')
+require File.join(__DIR__, 'lib', 's_data', 'atom_extensions', 'nodes', 'digest.rb')
+require File.join(__DIR__, 'lib', 's_data', 'atom_extensions', 'nodes', 'payload.rb')
+require File.join(__DIR__, 'lib', 's_data', 'atom_extensions', 'nodes', 'sync_state.rb')
+require File.join(__DIR__, 'lib', 's_data', 'payload.rb')
+require File.join(__DIR__, 'lib', 's_data', 'route_mapper.rb')
+require File.join(__DIR__, 'lib', 's_data', 'atom_extensions', 'content_mixin.rb')
+require File.join(__DIR__, 'lib', 's_data', 'atom_extensions', 'entry_mixin.rb')
+require File.join(__DIR__, 'lib', 's_data', 'namespace_definitions.rb')
+require File.join(__DIR__, 'lib', 's_data', 'predicate.rb')
+require File.join(__DIR__, 'lib', 's_data', 'active_record_extensions', 'mixin.rb')
+require File.join(__DIR__, 'lib', 's_data', 'active_record_extensions', 'sdata_uuid_mixin.rb')
+require File.join(__DIR__, 'lib', 's_data', 'active_record_extensions', 'base.rb')
+require File.join(__DIR__, 'lib', 's_data', 'virtual_base.rb')
+require File.join(__DIR__, 'lib', 's_data', 'conditions_builder.rb')
+require File.join(__DIR__, 'lib', 's_data', 'controller_mixin.rb')
+require File.join(__DIR__, 'lib', 's_data', 'payload_map', 'payload_map_hash.rb')
+require File.join(__DIR__, 'lib', 's_data', 'payload_map', 'payload_map.rb')
+require File.join(__DIR__, 'lib', 's_data', 'diagnosis', 'diagnosis.rb')
+require File.join(__DIR__, 'lib', 's_data', 'diagnosis', 'application_controller_mixin.rb')
+require File.join(__DIR__, 'lib', 's_data', 'diagnosis', 'diagnosis_mapper.rb')

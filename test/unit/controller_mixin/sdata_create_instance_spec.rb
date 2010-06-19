@@ -6,11 +6,9 @@ describe ControllerMixin, "#sdata_create_instance" do
   
   describe "given a controller which acts as sdata with a virtual model as a base" do
     
-    class VirtualModel < VirtualBase
+    class VirtualModel < SData::VirtualBase
       attr_accessor :baze
-      def self.baze_class
-        Class
-      end
+      self.baze_class = Class
     end
     
     before :all do
@@ -21,6 +19,7 @@ describe ControllerMixin, "#sdata_create_instance" do
     end
 
     before :each do
+      pending
       @controller = Base.new
     end  
 
@@ -110,6 +109,7 @@ describe ControllerMixin, "#sdata_create_instance" do
     end
 
     before :each do
+      pending
       @controller = Base.new
     end
 

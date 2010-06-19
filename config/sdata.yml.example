@@ -1,0 +1,20 @@
+# example of app config adding to or overriding the standard plugin config
+
+# required: at least 1 contract
+schemas:
+  crmErp:         http://schemas.sage.com/crmErp/2008
+
+# required, the host-with-protocol of your server
+base_url:         http://example.com
+# your sdata application name (required in sdata urls)
+application:      billingboss
+# the default contract supported by your app (required in sdata urls)
+contracts:        
+  - crmErp
+  - bb
+
+# default is 0, lower gets priority
+sync_endpoint_conflict_priority: 10
+
+# optional
+show_stack_trace: true
