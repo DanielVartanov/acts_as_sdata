@@ -196,5 +196,5 @@ Then,
 
 <i>without any changes in the controller code!</i>
 
-Copyright Sage 2009
-Released under the MIT license
+Copyright 2010 Sage
+acts_as_sdata is licensed by Sage under the "Apache License, Version 2.0":http://www.apache.org/licenses/LICENSE-2.0.html
