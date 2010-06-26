@@ -1,17 +1,11 @@
 require File.join(File.dirname(__FILE__), '..', 'spec_helper')
                                                           
-
 describe SData::ActiveRecordExtensions::Mixin, "#to_atom" do
   describe "given a class extended by ActiveRecordExtensions" do
     before :all do
-      Base = Class.new
       class Base
-        def self.name
-          super_name = super
-          "SData::Contracts::CrmErp::#{super_name}"
-        end
+        extend SData::ActiveRecordExtensions::Mixin
       end
-      Base.extend SData::ActiveRecordExtensions::Mixin
     end
 
     describe "when .acts_as_sdata is called without arguments" do
@@ -23,13 +17,7 @@ describe SData::ActiveRecordExtensions::Mixin, "#to_atom" do
       end
 
       it "should return an Atom::Entry instance" do
-        # begin
         @model.to_atom(:dataset => '-').should be_kind_of(Atom::Entry)
-        # rescue Exception => e
-        #   puts "e: #{e.inspect}"
-        # puts(e.backtrace.join("\n"))
-        # end
-      
       end
 
       it "should assign model name to Atom::Entry#content" do
@@ -68,6 +56,7 @@ describe SData::ActiveRecordExtensions::Mixin, "#to_atom" do
         @model.to_atom.categories[0].scheme.should == "http://schemas.sage.com/sdata/categories"
       end
 
+#      #QUESTION: Why is it commented out?
 #      it "should expose activerecord attributes in a simple XML extension" do
 #        @model.stub! :attributes => { :last_name => "Washington", :first_name => "George" }
 #        atom_entry = @model.to_atom
@@ -80,14 +69,11 @@ describe SData::ActiveRecordExtensions::Mixin, "#to_atom" do
         Base.class_eval do
           acts_as_sdata :title => lambda { "#{id}: #{name}" },
                         :content => lambda { "#{name}" }
-
-          def attributes; {} end
         end
 
         @model = Base.new
-        @model.stub! :id => 1, :name => 'Test', :updated_at => Time.now - 1.day, :created_by => @model, :sage_username => 'basic_user' 
+        @model.stub! :id => 1, :name => 'Test', :updated_at => Time.now - 1.day, :created_by => @model, :sage_username => 'basic_user'
         @model.stub! :sdata_content => "Base ##{@model.id}: #{@model.name}",  :to_xml => ''
-
       end
 
       it "should evaulate given lambda's in the correct context" do

@@ -1,3 +1,5 @@
+
+
 module SData
   module PayloadMap
     def define_payload_map(map)
@@ -17,42 +19,26 @@ module SData
         
         method_name = options[:method_name]
         payload_map[name] ||= options
-        if options.has_key?(:static_value)
-          value = options[:static_value]
-          class_eval do
-            define_method method_name do
-              value
-            end
-          end
-        elsif options.has_key?(:baze_field)
-          baze_field = options[:baze_field]
-          class_eval do
-            define_method method_name do
-              self.baze.__send__ baze_field
-            end
-          end
-        elsif options.has_key?(:method)
-        elsif options.has_key?(:proc)
-          block = options[:proc]
-          class_eval do              
-            define_method method_name, block
-          end
+        
+        case field_type(options)
+        when :static_value
+          define_static_value_reader method_name, options[:static_value]
+
+        when :baze_field
+          define_baze_field_reference method_name, options[:baze_field]
+
+        when :method
+
+        when :proc
+          define_proc_caller method_name, options[:proc]
+
           if options.has_key?(:proc_with_deleted)
             method_name_with_deleted = options[:method_name_with_deleted] = "#{method_name.to_s}_with_deleted"
-            block = options[:proc_with_deleted]
-            cache_var = "@#{method_name_with_deleted.to_s}_cached"
-            class_eval do              
-              define_method(method_name_with_deleted) do
-                unless instance_variable_get(cache_var)
-                  instance_variable_set(cache_var, instance_eval(&block))
-                else
-                end
-                instance_variable_get(cache_var)
-              end
-            end
+            define_proc_with_deleted_caller method_name_with_deleted, options[:proc_with_deleted]
           end
+
         else
-          raise SData::Exception::VirtualBase::InvalidSDataAttribute.new(
+          raise SData::Exceptions::VirtualBase::InvalidSDataAttribute.new(
               "#{args.join(", ")}: must supply a static_value, baze_field, method or proc")
         end
       end
@@ -61,9 +47,9 @@ module SData
     def has_sdata_association(*args)
       options = args.last.is_a?(Hash) ? args.pop : {:precedence => 50, :type => :association}
       options[:type] ||= :association
-      raise SData::Exception::VirtualBase::InvalidSDataAssociation.new(
+      raise SData::Exceptions::VirtualBase::InvalidSDataAssociation.new(
           "#{args.join(", ")}: must supply a proc or method") unless [:proc, :method].any?{|k|options.has_key?(k)}
-      raise SData::Exception::VirtualBase::InvalidSDataAssociation.new(
+      raise SData::Exceptions::VirtualBase::InvalidSDataAssociation.new(
           "#{args.join(", ")}: invalid association type '#{options[:type]}") unless [:association, :child].include?(options[:type])
       args.push options
       has_sdata_attr(*args)
@@ -97,8 +83,52 @@ module SData
             associations_with_deleted(expand)
           end
         end
+      end      
+    end
+
+  protected
+
+    def field_type(options)
+      [:static_value, :baze_field, :method, :proc].each do |type|
+        if options.has_key?(type)
+          return type
+        end
       end
-      
+      nil
+    end
+
+    def define_static_value_reader(method_name, value)
+      class_eval do
+        define_method method_name do
+          value
+        end
+      end
+    end
+
+    def define_baze_field_reference(method_name, baze_field)
+      class_eval do
+        define_method method_name do
+          self.baze.__send__ baze_field
+        end
+      end
+    end
+
+    def define_proc_caller(method_name, block)
+      class_eval do
+        define_method method_name, block
+      end
+    end
+
+    def define_proc_with_deleted_caller(method_name, block)
+      cache_var = "@#{method_name.to_s}_cached"
+      class_eval do
+        define_method(method_name) do
+          unless instance_variable_get(cache_var)
+            instance_variable_set(cache_var, instance_eval(&block))
+          end
+          instance_variable_get(cache_var)
+        end
+      end
     end
   end
 end

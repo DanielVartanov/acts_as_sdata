@@ -43,6 +43,10 @@ module SData
       "#{self.baze.class.name.demodulize}_#{self.baze.id}"
     end
     
+    def sd_class
+      self.class.name
+    end
+    
     def self.build_for(data, the_type=nil)
       if data.is_a? Array
         data.map {|item| virtual_base_for_object(item, the_type) }.compact

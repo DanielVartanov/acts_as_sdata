@@ -4,7 +4,10 @@ describe SData::PayloadMap do
   context "given sdata model class extended by SData::PayloadMap" do
     before :all do
       class TradingAccount < SData::VirtualBase
-        extend SData::PayloadMap
+#        extend SData::PayloadMap
+#
+        define_payload_map :foo => { :static_value => :bar }
+
         # temporary
         def method_missing(meth, *args, &block)
           if @payload
@@ -22,25 +25,10 @@ describe SData::PayloadMap do
 
     it "should respond to #has_sdata_attr class method" do
       TradingAccount.should respond_to(:has_sdata_attr)
+      #QUESTION: do we really need this method to be public?
     end
 
     describe "#define_payload_map" do
-      before :each do
-        TradingAccount.define_payload_map :some_field => { :static_value => 0 }
-      end
-
-      subject { TradingAccount.new(Object) }
-
-      it "should add :id baze field implicitly" do
-        pending # Please explain why we need this
-        #subject.payload_map[:id].should_not be_nil
-      end
-
-      it "shuold set precedence for implicity added :id" do
-        pending  # Please explain why we need this
-        subject.payload_map[:id][:precedence].should_not be_nil
-      end
-
       context "when mapping leads to static value" do
         before :each do
           TradingAccount.define_payload_map :tax_reference => { :static_value => 'Some static tax reference' }
@@ -129,7 +117,7 @@ describe SData::PayloadMap do
       end
     end
 
-    describe "#{}has_sdata_attr" do
+    describe "#has_sdata_attr" do
       before :each do
         @mock_baze = mock("thing", :dude => "sweet")
       end

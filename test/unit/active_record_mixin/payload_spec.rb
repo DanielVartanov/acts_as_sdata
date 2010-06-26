@@ -64,7 +64,7 @@ describe SData::ActiveRecordExtensions::Mixin, "#to_atom" do
             element.attributes_with_ns.keys.should == ['sdata:url']
             element.attributes_with_ns['sdata:url'].should == "http://www.example.com/sdata/example/myContract/myDataSet/customer('12345')/associatedContacts"
             element.children.map(&:name_with_ns).to_set.should == ["crmErp:contact", "crmErp:contact"].to_set
-            children = element.children.each do |child_element|
+            element.children.each do |child_element|
               case child_element.attributes_with_ns['sdata:key']
               when '123'
                 child_element.attributes_with_ns.keys.to_set.should == ['sdata:key', 'sdata:url', 'sdata:uuid'].to_set
@@ -93,7 +93,7 @@ describe SData::ActiveRecordExtensions::Mixin, "#to_atom" do
             element.attributes_with_ns.keys.should == ['sdata:url']
             element.attributes_with_ns['sdata:url'].should == "http://www.example.com/sdata/example/myContract/myDataSet/customer('12345')/myContacts"
             element.children.map(&:name_with_ns).to_set.should == ["crmErp:contact", "crmErp:contact"].to_set
-            children = element.children.each do |child_element|
+            element.children.each do |child_element|
               case child_element.attributes_with_ns['sdata:key']
               when '123'
                 child_element.attributes_with_ns.keys.to_set.should == ['sdata:key', 'sdata:url', 'sdata:uuid'].to_set
@@ -205,7 +205,7 @@ describe SData::ActiveRecordExtensions::Mixin, "#to_atom" do
             element.attributes_with_ns.keys.should == ['sdata:url']
             element.attributes_with_ns['sdata:url'].should == "http://www.example.com/sdata/example/myContract/myDataSet/customer('12345')/associatedContacts"
             element.children.map(&:name_with_ns).to_set.should == ["crmErp:contact", "crmErp:contact"].to_set
-            children = element.children.each do |child_element|
+            element.children.each do |child_element|
               case child_element.attributes_with_ns['sdata:key']
               when '123'
                 child_element.attributes_with_ns.keys.to_set.should == ['sdata:key', 'sdata:url', 'sdata:uuid'].to_set
@@ -233,7 +233,7 @@ describe SData::ActiveRecordExtensions::Mixin, "#to_atom" do
             element.attributes_with_ns.keys.should == ['sdata:url']
             element.attributes_with_ns['sdata:url'].should == "http://www.example.com/sdata/example/myContract/myDataSet/customer('12345')/myContacts"
             element.children.map(&:name_with_ns).to_set.should == ["crmErp:contact", "crmErp:contact"].to_set
-            children = element.children.each do |child_element|
+            element.children.each do |child_element|
               case child_element.attributes_with_ns['sdata:key']
               when '123'
                 child_element.attributes_with_ns.keys.to_set.should == ['sdata:key', 'sdata:url', 'sdata:uuid'].to_set
@@ -343,7 +343,7 @@ describe SData::ActiveRecordExtensions::Mixin, "#to_atom" do
             element.attributes_with_ns.keys.should == ['sdata:url']
             element.attributes_with_ns['sdata:url'].should == "http://www.example.com/sdata/example/myContract/myDataSet/customer('12345')/associatedContacts"
             element.children.map(&:name_with_ns).to_set.should == ["crmErp:contact", "crmErp:contact"].to_set
-            children = element.children.each do |child_element|
+            element.children.each do |child_element|
               case child_element.attributes_with_ns['sdata:key']
               when '123'
                 child_element.attributes_with_ns.keys.to_set.should == ['sdata:key', 'sdata:url', 'sdata:uuid'].to_set
@@ -373,7 +373,7 @@ describe SData::ActiveRecordExtensions::Mixin, "#to_atom" do
             element.attributes_with_ns.keys.should == ['sdata:url']
             element.attributes_with_ns['sdata:url'].should == "http://www.example.com/sdata/example/myContract/myDataSet/customer('12345')/myContacts"
             element.children.map(&:name_with_ns).to_set.should == ["crmErp:contact", "crmErp:contact"].to_set
-            children = element.children.each do |child_element|
+            element.children.each do |child_element|
               case child_element.attributes_with_ns['sdata:key']
               when '123'
                 child_element.attributes_with_ns.keys.to_set.should == ['sdata:key', 'sdata:url', 'sdata:uuid'].to_set
@@ -480,7 +480,7 @@ describe SData::ActiveRecordExtensions::Mixin, "#to_atom" do
             element.attributes_with_ns.keys.should == ['sdata:url']
             element.attributes_with_ns['sdata:url'].should == "http://www.example.com/sdata/example/myContract/myDataSet/customer('12345')/associatedContacts"
             element.children.map(&:name_with_ns).to_set.should == ["crmErp:contact", "crmErp:contact"].to_set
-            children = element.children.each do |child_element|
+            element.children.each do |child_element|
               case child_element.attributes_with_ns['sdata:key']
               when '123'
                 child_element.attributes_with_ns.keys.to_set.should == ['sdata:key', 'sdata:url', 'sdata:uuid'].to_set
