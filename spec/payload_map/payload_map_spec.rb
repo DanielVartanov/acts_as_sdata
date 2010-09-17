@@ -3,9 +3,7 @@ require File.join(File.dirname(__FILE__), '..', 'spec_helper')
 describe SData::PayloadMap do
   context "given sdata model class extended by SData::PayloadMap" do
     before :all do
-      class TradingAccount < SData::VirtualBase
-#        extend SData::PayloadMap
-#
+      class TradingAccount < SData::Resource
         define_payload_map :foo => { :static_value => :bar }
 
         # temporary

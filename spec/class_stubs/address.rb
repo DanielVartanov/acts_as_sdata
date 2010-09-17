@@ -1,7 +1,7 @@
 # SData::VirtualBase is uninitialized for some reason without below line
 require File.expand_path(File.join(File.dirname(__FILE__), '..', 'spec_helper'))
 
-class Address < SData::VirtualBase
+class Address < SData::Resource
   
   def self.descends_from_active_record?
     true

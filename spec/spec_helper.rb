@@ -14,9 +14,9 @@ setup_active_record
 
 Dir[File.join(File.dirname(__FILE__), 'spec_helpers', '**', '*.rb')].each { |helper| require helper }
 
-$:.unshift File.join(File.dirname(__FILE__), '..', '..', 'lib')
+$:.unshift File.join(File.dirname(__FILE__), '..', 'lib')
 __DIR__ = File.dirname(__FILE__)
-require File.expand_path(File.join(__DIR__, '..', '..', 'init'))
+require File.expand_path(File.join(__DIR__, '..', 'init'))
 require File.expand_path(File.join(__DIR__, 'class_stubs', 'model_base'))
 require File.expand_path(File.join(__DIR__, 'class_stubs', 'user'))
 require File.expand_path(File.join(__DIR__, 'class_stubs', 'customer'))
