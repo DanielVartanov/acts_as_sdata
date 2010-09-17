@@ -1,5 +1,4 @@
-class ModelBase
-  extend SData::PayloadMap
+class ModelBase < SData::VirtualBase
   attr_accessor :id
   
   def self.name
@@ -14,4 +13,5 @@ class ModelBase
   def sdata_options
     {}
   end
+  
 end

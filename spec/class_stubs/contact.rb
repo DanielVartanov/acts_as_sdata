@@ -2,6 +2,10 @@ class Contact < ModelBase
   
   attr_writer :customer, :name, :created_at, :updated_at
 
+  def self.descends_from_active_record?
+    true
+  end
+
   def baze
     self
   end
@@ -14,6 +18,10 @@ class Contact < ModelBase
     self
   end
 
+  def owner
+    @customer.owner
+  end
+  
   def sdata_content
     "Contact ##{self.id}: #{self.name}"
   end

@@ -6,7 +6,7 @@ module SData
   class << self
     def sdata_name(klass)
       case klass
-      when SData::VirtualBase
+      when SData::Resource
         klass.sdata_name
       when Class
         klass.respond_to?(:sdata_name) ? klass.sdata_name : nil
@@ -27,7 +27,7 @@ module SData
       unless @config
         @config = YAML.load_file(File.join(File.dirname(__FILE__), '..', 'config','sdata.yml'))
         app_config_file = ENV['SDATA_CONFIG_FILE']
-        app_config_file ||= File.join(RAILS_ROOT, 'config','sdata.yml') if defined?(RAILS_ROOT)
+        app_config_file ||= File.join(RAILS_ROOT, 'sdata', 'config', 'sdata.yml') if defined?(RAILS_ROOT)
         @config = @config.deep_merge(YAML.load_file(app_config_file)) unless app_config_file.nil?
         @config = @config.with_indifferent_access
         @config[:contracts] ||= []

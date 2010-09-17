@@ -8,6 +8,7 @@ module SData
       self.payload_map = PayloadMapHash.new(map)
       self.payload_map.each do |name, opts|
         has_sdata_attr(name, opts)
+        opts[:sdata_node_name] = name.to_s.camelize(:lower)
       end
     end
 
@@ -78,8 +79,8 @@ module SData
           yield child_node_data.merge(:name => child_node_name), child if block_given?
           case child
           when Array
-            child.each{ |grandchild| grandchild.associations_with_deleted(expand) if child.is_a?(SData::VirtualBase)}
-          when SData::VirtualBase
+            child.each{ |grandchild| grandchild.associations_with_deleted(expand) if child.is_a?(SData::Resource)}
+          when SData::Resource
             associations_with_deleted(expand)
           end
         end
@@ -133,4 +134,4 @@ module SData
   end
 end
 
-SData::VirtualBase.extend SData::PayloadMap
+SData::Resource.extend SData::PayloadMap

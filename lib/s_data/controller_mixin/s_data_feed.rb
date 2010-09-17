@@ -5,37 +5,37 @@ module SData
     protected
 
       def resource_url
-        sdata_options[:model].sdata_resource_kind_url(params[:dataset])
+        sdata_resource.sdata_resource_kind_url(params[:dataset])
       end
 
       def build_feed_links_for(feed)
         feed.links << Atom::Link.new(
           :rel => 'self',
-          :href => (resource_url + "?#{request.query_parameters.to_param}".chomp('?')),
+          :href => (resource_url + "?#{request.params.to_param}".chomp('?')),
           :type => 'application/atom+xml; type=feed',
           :title => 'Refresh')
         if (records_to_return > 0) && (@total_results > records_to_return)
           feed.links << Atom::Link.new(
             :rel => 'first',
-            :href => (resource_url + "?#{request.query_parameters.merge(:startIndex => '1').to_param}"),
+            :href => (resource_url + "?#{request.params.merge(:startIndex => '1').to_param}"),
             :type => 'application/atom+xml; type=feed',
             :title => 'First Page')
           feed.links << Atom::Link.new(
             :rel => 'last',
-            :href => (resource_url + "?#{request.query_parameters.merge(:startIndex => [1,(@last=(((@total_results-zero_based_start_index - 1) / records_to_return * records_to_return) + zero_based_start_index + 1))].max).to_param}"),
+            :href => (resource_url + "?#{request.params.merge(:startIndex => [1,(@last=(((@total_results-zero_based_start_index - 1) / records_to_return * records_to_return) + zero_based_start_index + 1))].max).to_param}"),
             :type => 'application/atom+xml; type=feed',
             :title => 'Last Page')
           if (one_based_start_index+records_to_return) <= @total_results
             feed.links << Atom::Link.new(
               :rel => 'next',
-              :href => (resource_url + "?#{request.query_parameters.merge(:startIndex => [1,[@last, (one_based_start_index+records_to_return)].min].max.to_s).to_param}"),
+              :href => (resource_url + "?#{request.params.merge(:startIndex => [1,[@last, (one_based_start_index+records_to_return)].min].max.to_s).to_param}"),
               :type => 'application/atom+xml; type=feed',
               :title => 'Next Page')
           end
           if (one_based_start_index > 1)
             feed.links << Atom::Link.new(
               :rel => 'previous',
-              :href => (resource_url + "?#{request.query_parameters.merge(:startIndex => [1,[@last, (one_based_start_index-records_to_return)].min].max.to_s).to_param}"),
+              :href => (resource_url + "?#{request.params.merge(:startIndex => [1,[@last, (one_based_start_index-records_to_return)].min].max.to_s).to_param}"),
               :type => 'application/atom+xml; type=feed',
               :title => 'Previous Page')
           end
@@ -80,7 +80,7 @@ module SData
       end
 
       def category_term
-        self.sdata_options[:model].name.demodulize.camelize(:lower).pluralize
+        self.sdata_resource.name.demodulize.camelize(:lower).pluralize
       end
     end
   end

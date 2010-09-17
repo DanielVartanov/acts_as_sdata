@@ -2,14 +2,14 @@ class Customer < ModelBase
 
   attr_writer :created_by, :name, :number, :contacts, :created_at, :updated_at, :address
   
-  def self.is_a?(value)
-    # Don't really like doing this but don't see a quick better way
-    return true if value == SData::VirtualBase
-    super
+  def self.descends_from_active_record?
+    true
   end
+  
   def baze
     self
   end
+
   def populate_defaults
     self.id = @id || object_id.abs
     self.name = @name || "Customer Name"
@@ -33,6 +33,10 @@ class Customer < ModelBase
     @created_by ? @created_by.id : nil
   end
 
+  def owner
+    @created_by
+  end
+  
   def sdata_content
     "Customer ##{self.id}: #{self.name}"
   end

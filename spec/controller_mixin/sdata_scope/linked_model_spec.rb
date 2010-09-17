@@ -38,7 +38,7 @@ describe SData::ControllerMixin, "#sdata_scope" do
         end
 
         it "should apply to SData::Predicate for conditions and append requirement for simply guid" do
-          Model.should_receive(:all).with :conditions => ['"born_at" > ? and id IN (SELECT bb_model_id FROM sd_uuids WHERE bb_model_type = \'BaseModel\' and sd_class = \'Model\')', '1900']
+          BaseModel.should_receive(:find_with_deleted).with(:all, {:conditions => ['"born_at" > ? and id IN (SELECT bb_model_id FROM sd_uuids WHERE bb_model_type = \'BaseModel\' and sd_class = \'Model\')', '1900']}).and_return([])
           @controller.send :sdata_scope
         end
       end
@@ -49,7 +49,7 @@ describe SData::ControllerMixin, "#sdata_scope" do
         end
 
         it "should return all entity records with simply guid" do
-          Model.should_receive(:all).with :conditions => ['id IN (SELECT bb_model_id FROM sd_uuids WHERE bb_model_type = \'BaseModel\' and sd_class = \'Model\')']
+          BaseModel.should_receive(:find_with_deleted).with(:all, {:conditions => ['id IN (SELECT bb_model_id FROM sd_uuids WHERE bb_model_type = \'BaseModel\' and sd_class = \'Model\')']}).and_return([])
           @controller.send :sdata_scope
         end
       end

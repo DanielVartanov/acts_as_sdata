@@ -55,7 +55,7 @@ describe SData::ControllerMixin, "#sdata_scope" do
         end
 
         it "should return all entity records with created_by, predicate, and link scope" do
-          Model.should_receive(:all).with :conditions => ['"born_at" > ? and created_by_id = ? and id IN (SELECT bb_model_id FROM sd_uuids WHERE bb_model_type = \'BaseModel\' and sd_class = \'Model\')', '1900', @user.id.to_s]
+          BaseModel.should_receive(:find_with_deleted).with(:all, {:conditions => ['"born_at" > ? and created_by_id = ? and id IN (SELECT bb_model_id FROM sd_uuids WHERE bb_model_type = \'BaseModel\' and sd_class = \'Model\')', '1900', @user.id.to_s]}).and_return([])
           @controller.send :sdata_scope
         end
       end

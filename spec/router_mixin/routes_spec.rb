@@ -26,7 +26,7 @@ describe ControllerMixin, "#sdata_collection" do
     before :all do
       TestController = Class.new
       @router = Usher::Interface.for(:rails23)
-      @router.draw(:delimiters => ['/', '.', '!', '\(', '\)' ]) do |map|
+      @router.draw(:delimiters => ['/', '.', '\(', '\)' ]) do |map|
         map.test '/test', :controller => 'test', :action => 'test_action'
         
         map.sdata_resource :items

@@ -41,7 +41,9 @@ describe SData::ActiveRecordExtensions::Mixin, "#to_atom" do
         @customer.contacts[1].name = "Second Contact Name"
         @customer.contacts.each do |contact|
           contact.populate_defaults
+          contact.customer = @customer
         end
+        @customer.created_by = User.new( :id => 123)
         @customer.address.populate_defaults
       end
 

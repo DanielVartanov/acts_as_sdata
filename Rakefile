@@ -1,4 +1,4 @@
-require 'rake'
+conrequire 'rake'
 
 begin
   require 'jeweler'

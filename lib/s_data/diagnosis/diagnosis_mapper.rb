@@ -29,6 +29,8 @@ module SData
           SData::ApplicationDiagnosis.new(:exception => exception, :http_status_code => '401')
         when 'IncompatibleDataException'
           SData::BadWhereSyntax.new(:exception => exception, :http_status_code => '409')
+        when 'NotFound'
+          SData::ResourceKindNotFound.new(:exception => exception, :http_status_code => '404')
         else
           SData::ApplicationDiagnosis.new(:exception => exception, :http_status_code => '500')
         end

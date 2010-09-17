@@ -67,7 +67,7 @@ module SData
       attributes.each_pair do |key,value|
         node[key] = value.to_s
       end
-      if (node_name == self.root_node_name) || (expand != :none) || included.include?(formatted(node_name))
+      if (node_name == self.root_node_name) || (expand != :none) || included.include?(node_name)
         expand = :none if (expand == :immediate_children) 
         node_value.payload_map.each_pair do |child_node_name, child_node_data|
           if child_node_data[:type] == :association
@@ -75,9 +75,9 @@ module SData
           else
             child_expand = (is_sync? ? :all_children : expand)
           end
-          collection = ({:parent => node_value, :url => formatted(child_node_name), :type => node_value.payload_map[child_node_name][:type]})
+          collection = ({:parent => node_value, :url => child_node_data[:sdata_node_name], :type => node_value.payload_map[child_node_name][:type]})
           attribute_method_name = sdata_attribute_method(child_node_data)
-          node << generate(formatted(child_node_name), node_value.send(attribute_method_name), child_expand, child_node_data[:precedence], collection)
+          node << generate(child_node_data[:sdata_node_name], node_value.send(attribute_method_name), child_expand, child_node_data[:precedence], collection)
         end
       end
       node
@@ -111,7 +111,7 @@ module SData
       expand = :none if (expand == :immediate_children) 
       node = XML::Node.new(qualified(node_name))
       node_value.each do |item|
-        node << generate(formatted(node_name).singularize, item, expand, element_precedence, (item.is_a?(Hash) ? item[:resource_collection] : nil))
+        node << generate(node_name.singularize, item, expand, element_precedence, (item.is_a?(Hash) ? item[:resource_collection] : nil))
       end
       node      
     end
@@ -136,7 +136,7 @@ module SData
     end
 
     def qualified(node_name)
-      "#{contract}:#{(formatted(node_name))}"
+      "#{contract}:#{node_name}"
     end
 
     def formatted(node_name)

@@ -3,7 +3,12 @@ require File.expand_path(File.join(File.dirname(__FILE__), '..', 'spec_helper'))
 
 class Address < SData::VirtualBase
   
-  attr_writer :city, :created_at, :updated_at, :owner
+  def self.descends_from_active_record?
+    true
+  end
+  
+  attr_writer :city, :created_at, :updated_at
+  attr_accessor :owner
   def populate_defaults
     self.city = @city || "Vancouver"
     self.created_at = @created_at || Time.now-2.days

@@ -1,5 +1,9 @@
 class User < ModelBase
   
+  def self.descends_from_active_record?
+    true
+  end
+  
   attr_writer :name, :password, :customers, :created_at, :updated_at
   def populate_defaults
     self.id = @id || object_id.abs
@@ -11,6 +15,10 @@ class User < ModelBase
     self
   end
 
+  def owner
+    self
+  end
+  
   def record_id
     @record ? @record.id : nil
   end

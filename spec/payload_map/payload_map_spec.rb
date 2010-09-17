@@ -46,7 +46,7 @@ describe SData::PayloadMap do
 
         describe "#payload_map" do
           it "should store it correctly" do
-            subject.payload_map[:tax_reference].should == { :static_value => 'Some static tax reference', :method_name => :tax_reference, :method_name_with_deleted=>:tax_reference}
+            subject.payload_map[:tax_reference].should == { :static_value => 'Some static tax reference', :method_name => :tax_reference, :method_name_with_deleted=>:tax_reference, :sdata_node_name=>"taxReference"}
           end
         end
       end

@@ -10,22 +10,22 @@ module SData
         self.__send__ :extend, ClassMethods
       end
 
-      def find_by_sdata_instance_id(value)
-        attribute = self.sdata_options[:instance_id]
-
-        attribute.nil? ?
-          self.find(value.to_i) :
-          self.first(:conditions => { attribute => value })
-      end
-
       module ClassMethods
       
-        def sdata_node_name(entity=self)
-          self.name.demodulize.camelize(:lower)
+        def find_by_sdata_instance_id(value)
+          attribute = self.sdata_options[:instance_id]
+
+          attribute.nil? ?
+            self.find(value.to_i) :
+            self.first(:conditions => { attribute => value })
+        end
+
+        def sdata_node_name
+          @sdata_node_name ||= self.name.demodulize.camelize(:lower)
         end  
 
         def sdata_contract_name
-          SData.sdata_contract_name(self.name)
+          @sdata_contract_name ||= SData.sdata_contract_name(self.name)
         end
       
         def sdata_resource_kind_url(dataset)
@@ -95,8 +95,8 @@ module SData
           self.class.name.demodulize
         end
 
-        def sdata_node_name(entity=self.class)
-          self.class.sdata_node_name(entity)
+        def sdata_node_name
+          self.class.sdata_node_name
         end
 
         def sdata_resource_url(dataset)
@@ -149,9 +149,5 @@ module SData
     end
   end
 end
-# Extension of ActiveRecord removed due to refactoring. Now SData::VirtualBase is extended instead.
-# Not sure yet if there is a case where we DO need to extend ActiveRecord directly.
-# Might considering merging those two classes otherwise.
-# RADAR: Tested refactoring, but it could still be buggy if I missed something! Watch out.
 
 
