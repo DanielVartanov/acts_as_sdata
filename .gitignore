@@ -2,3 +2,6 @@ nbproject
 .idea
 *.gemspec
 pkg
+\#*#
+\.#*
+*flymake*
