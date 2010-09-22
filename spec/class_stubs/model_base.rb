@@ -1,4 +1,4 @@
-class ModelBase < SData::VirtualBase
+class ModelBase < SData::Resource
   attr_accessor :id
   
   def self.name
