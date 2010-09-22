@@ -20,7 +20,7 @@ describe ControllerMixin, "#sdata_collection_sync_feed" do
       end
     end
 
-    class VirtualModel < SData::VirtualBase
+    class VirtualModel < SData::Resource
       attr_accessor :baze
     end
     

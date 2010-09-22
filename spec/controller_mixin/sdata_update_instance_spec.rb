@@ -19,7 +19,7 @@ describe ControllerMixin, "#sdata_update_instance" do
       end
     end
 
-    class VirtualModel < SData::VirtualBase
+    class VirtualModel < SData::Resource
       attr_accessor :baze
     end
     

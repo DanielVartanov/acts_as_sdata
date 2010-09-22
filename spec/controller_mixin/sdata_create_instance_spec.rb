@@ -6,7 +6,7 @@ describe ControllerMixin, "#sdata_create_instance" do
   
   describe "given a controller which acts as sdata with a virtual model as a base" do
     
-    class VirtualModel < SData::VirtualBase
+    class VirtualModel < SData::Resource
       attr_accessor :baze
       self.baze_class = Class
     end

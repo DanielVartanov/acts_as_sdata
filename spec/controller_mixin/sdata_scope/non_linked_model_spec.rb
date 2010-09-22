@@ -5,7 +5,7 @@ describe SData::ControllerMixin, "#sdata_scope" do
     before :all do
 
       Object.__send__ :remove_const, :Model if defined?(Model)
-      class Model < SData::VirtualBase
+      class Model < SData::Resource
         self.baze_class = Class.new
 
         define_payload_map :born_at => { :baze_field => :born_at }
