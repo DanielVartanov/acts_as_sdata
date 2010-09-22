@@ -4,8 +4,6 @@ describe SData::PayloadMap do
   context "given sdata model class extended by SData::PayloadMap" do
     before :all do
       class TradingAccount < SData::Resource
-#        extend SData::PayloadMap
-#
         define_payload_map :foo => { :static_value => :bar }
 
         # temporary

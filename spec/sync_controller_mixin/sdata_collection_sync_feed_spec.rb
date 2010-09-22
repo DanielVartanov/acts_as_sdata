@@ -2,7 +2,7 @@ require File.join(File.dirname(__FILE__), '..', 'spec_helper')
 
 include SData::Sync
 
-describe ControllerMixin, "#sdata_collection_sync_feed" do
+describe SData::ControllerMixin, "#sdata_collection_sync_feed" do
 
     class BaseClass
       attr_accessor :status
@@ -27,7 +27,7 @@ describe ControllerMixin, "#sdata_collection_sync_feed" do
     before :all do
       VirtualModel.stub :baze_class => BaseClass
       Base = Class.new(ActionController::Base)
-      Base.extend ControllerMixin
+      Base.extend SData::ControllerMixin
       Base.acts_as_sdata  :model => VirtualModel
       Base.syncs_sdata
       VirtualModel.acts_as_sdata
